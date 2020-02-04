@@ -1,6 +1,109 @@
 (function () {
 	'use strict';
 
+	const pushStateIsAvailable = typeof window !== 'undefined' && window.history && window.history.pushState;
+	const replaceStateIsAvailable = typeof window !== 'undefined' && window.history && window.history.replaceState;
+
+	class Router {
+		constructor(...routes) {
+			this.hasRouteListener = false;
+			this.currentUri = window.location.hash;
+			this.routes = routes;
+			this.routerElement = document.createElement('div');
+
+			this.routerElement.setAttribute('data-router-view', true);
+
+			this.push('#home');
+
+			this.init();
+
+			window.onpopstate = (event) => {
+				/*
+					When the `onpopstate` events equals to null it means that we're on the
+					first route, however, the user has to click browser back one more time
+					to go back to the previous page.
+				*/
+
+			};
+		}
+
+		push(uri, queryParams) {
+			if (pushStateIsAvailable) {
+				this.currentUri = uri;
+
+				const correctedUri = queryParams ? `${this.currentUri}?${queryParams}` : this.currentUri;
+
+				window.history.pushState({ page: correctedUri }, null, correctedUri);
+				this.pagesViewed += 1;
+
+				this.init();
+			}
+		}
+
+		/*
+			Replace the current route but decrement this.pagesViewed so eventually
+			when the user is "on the first page", the user goes back to the previous
+			site when they click browser back again.
+		*/
+		back(uri, queryParams) {
+			if (replaceStateIsAvailable) {
+				this.currentUri = uri;
+
+				const correctedUri = queryParams ? `${this.currentUri}?${queryParams}` : this.currentUri;
+
+				window.history.replaceState({ page: correctedUri }, null, correctedUri);
+				this.pagesViewed -= 1;
+
+				this.init();
+			}
+		}
+
+		replace(uri, queryParams) {
+			if (replaceStateIsAvailable) {
+				this.currentUri = uri;
+
+				const correctedUri = queryParams ? `${this.currentUri}?${queryParams}` : this.currentUri;
+
+				return window.history.replaceState({ page: correctedUri }, null, correctedUri)
+			}
+		}
+
+		init() {
+			this.routes.forEach(route => {
+				if (route.pathname === this.currentUri) {
+					this.routerElement.innerHTML = route.render();
+				}
+			});
+
+			// Listen for router links on the page
+			if (!this.hasRouteListener) {
+				this.routerElement.addEventListener('click', event => {
+					const { target } = event;
+					const isRouterLink = target.getAttribute('data-router-link') !== null;
+
+					if (isRouterLink) {
+						event.preventDefault();
+
+						this.push(target.hash);
+					}
+				});
+
+				this.hasRouteListener = true;
+			}
+		}
+	}
+
+	class Route {
+		constructor(pathname, component) {
+			this.pathname = `#${pathname}`;
+			this.component = component;
+		}
+
+		render() {
+			return this.component.render()
+		}
+	}
+
 	class RouterLink {
 		constructor(to, text) {
 			this.to = to;
@@ -9,10 +112,36 @@
 
 		render() {
 			return `
-			<a href="${this.to}" data-router-link>${this.text}</a>
+			<a href="#${this.to}" data-router-link>${this.text}</a>
 		`
 		}
 	}
+
+	class Home {
+		render() {
+			return `
+			<main>
+				<h1>Home page</h1>
+				${new RouterLink('detail', 'To detail page').render()}
+			</main>
+		`
+		}
+	}
+
+	var Home$1 = new Home;
+
+	class Detail {
+		render() {
+			return `
+			<main>
+				<h1>Detail page</h1>
+				${new RouterLink('home', 'Back to home page').render()}
+			</main>
+		`
+		}
+	}
+
+	var Detail$1 = new Detail;
 
 	var formatDate = date => {
 		const parsedDate = new Date(date);
@@ -115,6 +244,14 @@
 	}
 
 	const endpoint = 'https://api.spacexdata.com/v3/launches';
+	const router = new Router(
+		new Route('home', Home$1),
+		new Route('detail', Detail$1)
+	);
+	const { routerElement } = router;
+
+	document.getElementById('app')
+		.appendChild(routerElement);
 
 	fetch(endpoint)
 		.then(response => response.json())
@@ -126,7 +263,7 @@
 	function renderData(data, node) {
 		console.log(data);
 
-		node.innerHTML = new LaunchList(data).render();
+		node.insertAdjacentHTML('beforeend', new LaunchList(data).render());
 	}
 
 }());
