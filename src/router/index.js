@@ -38,7 +38,6 @@ export class Router {
 			const correctedUri = queryParams ? `${this.currentUri}?${queryParams}` : this.currentUri
 
 			window.history.pushState({ page: correctedUri }, null, correctedUri)
-			this.pagesViewed += 1
 
 			this.updateRouterView()
 		}
