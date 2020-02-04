@@ -3,8 +3,9 @@
  "version": "1.0.0",
  "main": "index.js",
  "scripts": {
-	"dev": "run-p serve bundle:js",
-	"bundle:js": "rollup -c --watch",
+	"build": "rollup -c",
+	"dev": "run-p serve watch",
+	"watch": "rollup -c --watch",
 	"serve": "sirv docs --port 3031 --single --dev"
  },
  "repository": "git@github.com:kriskuiper/web-app-from-scratch-1920.git",
