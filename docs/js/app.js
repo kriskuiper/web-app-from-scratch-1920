@@ -26,6 +26,11 @@
 					to go back to the previous page.
 				*/
 
+				this.currentUri = event.state
+					? event.state.page
+					: this.currentUri;
+
+				this.init();
 			};
 		}
 
