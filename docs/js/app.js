@@ -17,7 +17,7 @@
 				this.push('#home');
 			}
 
-			this.init();
+			this.updateRouterView();
 
 			window.onpopstate = (event) => {
 				/*
@@ -30,7 +30,7 @@
 					? event.state.page
 					: this.currentUri;
 
-				this.init();
+				this.updateRouterView();
 			};
 		}
 
@@ -43,25 +43,7 @@
 				window.history.pushState({ page: correctedUri }, null, correctedUri);
 				this.pagesViewed += 1;
 
-				this.init();
-			}
-		}
-
-		/*
-			Replace the current route but decrement this.pagesViewed so eventually
-			when the user is "on the first page", the user goes back to the previous
-			site when they click browser back again.
-		*/
-		back(uri, queryParams) {
-			if (replaceStateIsAvailable) {
-				this.currentUri = uri;
-
-				const correctedUri = queryParams ? `${this.currentUri}?${queryParams}` : this.currentUri;
-
-				window.history.replaceState({ page: correctedUri }, null, correctedUri);
-				this.pagesViewed -= 1;
-
-				this.init();
+				this.updateRouterView();
 			}
 		}
 
@@ -75,7 +57,7 @@
 			}
 		}
 
-		init() {
+		updateRouterView() {
 			this.routes.forEach(route => {
 				if (route.pathname === this.currentUri) {
 					this.routerElement.innerHTML = route.render();
