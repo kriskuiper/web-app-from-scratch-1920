@@ -6,11 +6,15 @@ class LaunchList {
 	}
 
 	render() {
-		return this.items
-			.map(item => {
-				return new LaunchItem(item).render()
-			})
-			.join('')
+		return `
+			<div class="launch-list">
+				${this.items
+					.map(item => {
+						return new LaunchItem(item).render()
+					})
+					.join('')}
+			</div>
+		`
 	}
 }
 

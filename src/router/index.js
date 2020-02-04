@@ -34,7 +34,6 @@ export class Router {
 
 	init() {
 		this.routes.forEach(route => {
-			console.log(this.currentUri, route)
 			if (route.pathname === this.currentUri) {
 
 				this.routerElement.innerHTML = route.render()
