@@ -13,7 +13,9 @@
 
 			this.routerElement.setAttribute('data-router-view', true);
 
-			this.push('#home');
+			if (!this.currentUri) {
+				this.push('#home');
+			}
 
 			this.init();
 
