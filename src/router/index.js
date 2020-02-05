@@ -1,5 +1,10 @@
-const pushStateIsAvailable = typeof window !== 'undefined' && window.history && window.history.pushState
-const replaceStateIsAvailable = typeof window !== 'undefined' && window.history && window.history.replaceState
+import getCorrectedUri from './lib/get-corrected-uri'
+import {
+	pushStateIsAvailable,
+	replaceStateIsAvailable,
+	pushState,
+	replaceState
+} from './lib/history-helpers'
 
 export class Router {
 	constructor(...routes) {
@@ -7,22 +12,24 @@ export class Router {
 		this.currentUri = window.location.hash
 		this.routes = routes
 		this.routerElement = document.createElement('div')
-
 		this.routerElement.setAttribute('data-router-view', true)
 
-		if (!this.currentUri) {
-			this.push('#home')
+		if (!pushStateIsAvailable || !replaceStateIsAvailable) {
+			throw new Error('Push state is not available here, router will not work as expected...')
 		}
 
-		this.updateRouterView()
+		/*
+			If there's no hash present, then replace / with #home
+		*/
+		if (!this.currentUri) {
+			this.replace('#home')
+		}
 
-		window.onpopstate = (event) => {
-			/*
-				When the `onpopstate` events equals to null it means that we're on the
-				first route, however, the user has to click browser back one more time
-				to go back to the previous page.
-			*/
-
+		/*
+			Update the routerView when an `onpopstate` event fires (usually
+			happens when the user clicks browser buttons).
+		*/
+		window.onpopstate = event => {
 			this.currentUri = event.state
 				? event.state.page
 				: this.currentUri
@@ -32,25 +39,19 @@ export class Router {
 	}
 
 	push(uri, queryParams) {
-		if (pushStateIsAvailable) {
-			this.currentUri = uri
+		this.currentUri = getCorrectedUri(uri, queryParams)
 
-			const correctedUri = queryParams ? `${this.currentUri}?${queryParams}` : this.currentUri
+		pushState({ page: this.currentUri }, this.currentUri)
 
-			window.history.pushState({ page: correctedUri }, null, correctedUri)
-
-			this.updateRouterView()
-		}
+		this.updateRouterView()
 	}
 
 	replace(uri, queryParams) {
-		if (replaceStateIsAvailable) {
-			this.currentUri = uri
+		this.currentUri = getCorrectedUri(uri, queryParams)
 
-			const correctedUri = queryParams ? `${this.currentUri}?${queryParams}` : this.currentUri
+		replaceState({ page: this.currentUri }, this.currentUri)
 
-			return window.history.replaceState({ page: correctedUri }, null, correctedUri)
-		}
+		this.updateRouterView()
 	}
 
 	updateRouterView() {
