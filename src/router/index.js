@@ -61,7 +61,7 @@ export class Router {
 			}
 		})
 
-		// Listen for router links on the page
+		// Listen for router links on the page if the router isn't listening yet
 		if (!this.hasRouteListener) {
 			this.routerElement.addEventListener('click', event => {
 				const { target } = event
