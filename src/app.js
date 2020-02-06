@@ -26,5 +26,3 @@ function renderData(data, node) {
 
 	node.insertAdjacentHTML('beforeend', new LaunchList(data).render())
 }
-
-
