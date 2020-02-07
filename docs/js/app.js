@@ -159,6 +159,10 @@
 
 	var Detail$1 = new Detail;
 
+	const maybePrefixWithZero = num => {
+		return num < 10 ? `0${num}` : num
+	};
+
 	var formatDate = date => {
 		const parsedDate = new Date(date);
 		const day = maybePrefixWithZero(parsedDate.getDay());
@@ -168,11 +172,18 @@
 		return `${day}-${month}-${year}`
 	};
 
-	function maybePrefixWithZero(num) {
-		return num < 10
-			? `0${num}`
-			: num
-	}
+	const maybeSetDataSuccess = successState => {
+		return successState
+			? 'data-success'
+			: ''
+	};
+
+	const getIcon = successState => {
+		const baseUrl = '/assets/icons/';
+		const iconName = successState ? 'check.svg' : 'warning.svg';
+
+		return `${baseUrl}${iconName}`
+	};
 
 	class LaunchItem {
 		constructor({ mission_name, launch_site, launch_success, launch_date_utc, links, rocket }) {
@@ -228,17 +239,6 @@
 			</article>
 		`
 		}
-	}
-
-	function maybeSetDataSuccess(successState) {
-		return successState ? 'data-success' : ''
-	}
-
-	function getIcon(successState) {
-		const baseUrl = '/assets/icons/';
-		const iconName = successState ? 'check.svg' : 'warning.svg';
-
-		return `${baseUrl}${iconName}`
 	}
 
 	class LaunchList {

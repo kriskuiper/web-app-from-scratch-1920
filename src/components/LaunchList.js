@@ -1,6 +1,6 @@
 import LaunchItem from './LaunchItem'
 
-class LaunchList {
+export default class LaunchList {
 	constructor(items) {
 		this.items = items
 	}
@@ -17,5 +17,3 @@ class LaunchList {
 		`
 	}
 }
-
-export default LaunchList

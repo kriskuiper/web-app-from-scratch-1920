@@ -1,7 +1,20 @@
 import { RouterLink } from '../router'
 import formatDate from '../lib/format-date'
 
-class LaunchItem {
+const maybeSetDataSuccess = successState => {
+	return successState
+		? 'data-success'
+		: ''
+}
+
+const getIcon = successState => {
+	const baseUrl = '/assets/icons/'
+	const iconName = successState ? 'check.svg' : 'warning.svg'
+
+	return `${baseUrl}${iconName}`
+}
+
+export default class LaunchItem {
 	constructor({ mission_name, launch_site, launch_success, launch_date_utc, links, rocket }) {
 		this.name = mission_name
 		this.launchSite = launch_site.site_name_long
@@ -56,16 +69,3 @@ class LaunchItem {
 		`
 	}
 }
-
-function maybeSetDataSuccess(successState) {
-	return successState ? 'data-success' : ''
-}
-
-function getIcon(successState) {
-	const baseUrl = '/assets/icons/'
-	const iconName = successState ? 'check.svg' : 'warning.svg'
-
-	return `${baseUrl}${iconName}`
-}
-
-export default LaunchItem
