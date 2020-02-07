@@ -266,6 +266,12 @@
 	);
 	const { routerElement } = router;
 
+	const renderData = (data, node) => {
+		console.log(data);
+
+		node.insertAdjacentHTML('beforeend', new LaunchList(data).render());
+	};
+
 	document.getElementById('app')
 		.appendChild(routerElement);
 
@@ -275,11 +281,5 @@
 			renderData(launches, document.getElementById('app'));
 		})
 		.catch(console.error);
-
-	function renderData(data, node) {
-		console.log(data);
-
-		node.insertAdjacentHTML('beforeend', new LaunchList(data).render());
-	}
 
 }());
