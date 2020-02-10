@@ -1,14 +1,15 @@
+import Component from '../lib/Component'
 import LaunchItem from './LaunchItem'
 
-export default class LaunchList {
-	constructor(items) {
-		this.items = items
+export default class LaunchList extends Component {
+	constructor(props) {
+		super(props)
 	}
 
 	render() {
 		return `
 			<div class="launch-list">
-				${this.items
+				${this.props.items
 					.map(item => {
 						return new LaunchItem(item).render()
 					})
