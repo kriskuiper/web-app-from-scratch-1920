@@ -165,6 +165,7 @@
 				We can now safely push the callback to the events from
 				our dispatcher
 			*/
+			console.log('subscribing... ', callback);
 			self.events[eventName].push(callback);
 		}
 
