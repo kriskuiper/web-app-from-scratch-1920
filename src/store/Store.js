@@ -12,7 +12,7 @@ export default class Store {
 		self.events = new EventDispatcher
 
 		self.state = new Proxy(initialState || {}, {
-			set: (state, key, newValue) => {
+			set(state, key, newValue) {
 				// Just set the value as you would do with an object
 				state[key] = newValue
 
