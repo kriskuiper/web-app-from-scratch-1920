@@ -12,14 +12,15 @@ export default class App {
 		)
 		this.target = document.querySelector(target)
 		this.element = this.router.view.element
-		this.endpoint = 'https://api.spacexdata.com/v3/launches'
 	}
 
 	init() {
 		if (window.Worker) {
 			const worker = new Worker('js/worker.js')
 
-			worker.postMessage({ name: 'henk' })
+			worker.addEventListener('message', event => {
+				console.log(event.data)
+			})
 		}
 
 		this.target.appendChild(this.element)
