@@ -1,4 +1,4 @@
-import { RouterLink } from '../router'
+import RouterLink from '../router/RouterLink'
 
 class Home {
 	render() {
