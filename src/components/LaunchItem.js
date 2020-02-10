@@ -1,3 +1,4 @@
+import Component from '../lib/Component'
 import RouterLink from '../router/RouterLink'
 import formatDate from '../lib/format-date'
 
@@ -14,18 +15,20 @@ const getIcon = successState => {
 	return `${baseUrl}${iconName}`
 }
 
-export default class LaunchItem {
-	constructor({ mission_name, launch_site, launch_success, launch_date_utc, links, rocket }) {
-		this.name = mission_name
-		this.launchSite = launch_site.site_name_long
-		this.isSuccess = launch_success
-		this.rocketName = rocket.rocket_name
-		this.launchDate = launch_date_utc
+export default class LaunchItem extends Component {
+	constructor(props) {
+		super(props)
+
+		this.name = props.mission_name
+		this.launchSite = props.launch_site.site_name_long
+		this.isSuccess = props.launch_success
+		this.rocketName = props.rocket.rocket_name
+		this.launchDate = props.launch_date_utc
 		this.imageSrcSet = [
-			`${links.mission_patch_small} 400w`,
-			`${links.mission_patch} 800w`
+			`${props.links.mission_patch_small} 400w`,
+			`${props.links.mission_patch} 800w`
 		].join(', ')
-		this.fallbackImage = links.mission_patch
+		this.fallbackImage = props.links.mission_patch
 		this.imageSizes = [
 			// TODO: add image sizes
 		]

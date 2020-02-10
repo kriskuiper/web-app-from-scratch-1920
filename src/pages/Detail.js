@@ -1,11 +1,12 @@
+import Component from '../lib/Component'
 import RouterLink from '../router/RouterLink'
 
-class Detail {
+class Detail extends Component {
 	render() {
 		return `
 			<main>
 				<h1>Detail page</h1>
-				${new RouterLink('home', 'Back to home page').render()}
+				${new RouterLink({ to: 'home' , text: 'To homepage'}).render()}
 			</main>
 		`
 	}

@@ -1,12 +1,8 @@
-export default class RouterLink {
-	constructor(to, text, options) {
-		this.to = to
-		this.text = text
-		this.options = options || {}
-	}
+import Component from '../lib/Component'
 
+export default class RouterLink extends Component {
 	maybeAddClasses() {
-		return this.options.classNames
+		return this.props.options && this.props.options.classNames
 			? `class="${this.options.classNames.join(' ')}"`
 			: ''
 	}
@@ -15,10 +11,10 @@ export default class RouterLink {
 		return `
 			<a
 				${this.maybeAddClasses()}
-				href="#${this.to}"
+				href="#${this.props.to}"
 				data-router-link
 			>
-				${this.text}
+				${this.props.text}
 			</a>
 		`
 	}

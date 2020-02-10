@@ -1,11 +1,17 @@
+import store from '../store'
+import Component from '../lib/Component'
 import RouterLink from '../router/RouterLink'
 
-class Home {
+class Home extends Component {
+	constructor() {
+		super({ store })
+	}
+
 	render() {
 		return `
 			<main>
 				<h1>Home page</h1>
-				${new RouterLink('detail', 'To detail page').render()}
+				${new RouterLink({ to: 'detail', text: 'Detail page' }).render()}
 			</main>
 		`
 	}
