@@ -323,7 +323,11 @@
 		}
 
 		init() {
-			const worker = new Worker('/js/worker.js');
+			if (window.Worker) {
+				const worker = new Worker('js/worker.js');
+
+				worker.postMessage({ name: 'henk' });
+			}
 
 			this.target.appendChild(this.element);
 		}

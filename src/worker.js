@@ -1,1 +1,3 @@
-console.log('hello from the worker')
+onmessage = event => {
+	console.log(event.data)
+}
