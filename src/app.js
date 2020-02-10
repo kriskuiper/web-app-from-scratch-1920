@@ -16,6 +16,8 @@ export default class App {
 	}
 
 	init() {
+		const worker = new Worker('worker.js')
+
 		this.target.appendChild(this.element)
 	}
 }
