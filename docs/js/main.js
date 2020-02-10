@@ -323,7 +323,7 @@
 		}
 
 		init() {
-			const worker = new Worker('worker.js');
+			const worker = new Worker('/js/worker.js');
 
 			this.target.appendChild(this.element);
 		}
