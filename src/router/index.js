@@ -38,6 +38,12 @@ export class Router {
 		}
 	}
 
+	/**
+	 * @description - Pushes a new entry to the users' history
+	 * @param {string} uri - The hash to push to
+	 * @param {string} queryParams - queryParams to add to the hash
+	 * @example - Router.push('#home', '?js-enabled=true)
+	 */
 	push(uri, queryParams) {
 		this.currentUri = getCorrectedUri(uri, queryParams)
 
@@ -46,6 +52,12 @@ export class Router {
 		this.updateView()
 	}
 
+	/**
+	 * @description - Replaces the current hash
+	 * @param {string} uri - The uri to replace the hash with
+	 * @param {string} queryParams - queryParams to add to the hash
+	 * @example - Router.replace('#home', '?my-query=awesome')
+	 */
 	replace(uri, queryParams) {
 		this.currentUri = getCorrectedUri(uri, queryParams)
 
@@ -54,6 +66,9 @@ export class Router {
 		this.updateView()
 	}
 
+	/**
+	 * @description - Updates the view inside routerElement with a new page component
+	 */
 	updateView() {
 		this.routes.forEach(route => {
 			if (route.pathname === this.currentUri) {
