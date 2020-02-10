@@ -6,7 +6,11 @@ export default {
 	output: {
 		file: 'docs/js/main.js',
 		format: 'iife',
-		name: 'bundle',
+	},
+	input: 'src/worker.js',
+	output: {
+		file: 'docs/js/worker.js',
+		format: 'iife',
 	},
 	plugins: [
 		resolve({
