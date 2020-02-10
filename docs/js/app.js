@@ -42,6 +42,8 @@
 				this.replace('#home');
 			}
 
+			this.replace(this.currentUri);
+
 			/*
 				Update the routerView when an `onpopstate` event fires (usually
 				happens when the user clicks browser buttons).
@@ -51,27 +53,42 @@
 					? event.state.page
 					: this.currentUri;
 
-				this.updateRouterView();
+				this.updateView();
 			};
 		}
 
+		/**
+		 * @description - Pushes a new entry to the users' history
+		 * @param {string} uri - The hash to push to
+		 * @param {string} queryParams - queryParams to add to the hash
+		 * @example - Router.push('#home', '?js-enabled=true)
+		 */
 		push(uri, queryParams) {
 			this.currentUri = getCorrectedUri(uri, queryParams);
 
 			pushState({ page: this.currentUri }, this.currentUri);
 
-			this.updateRouterView();
+			this.updateView();
 		}
 
+		/**
+		 * @description - Replaces the current hash
+		 * @param {string} uri - The uri to replace the hash with
+		 * @param {string} queryParams - queryParams to add to the hash
+		 * @example - Router.replace('#home', '?my-query=awesome')
+		 */
 		replace(uri, queryParams) {
 			this.currentUri = getCorrectedUri(uri, queryParams);
 
 			replaceState({ page: this.currentUri }, this.currentUri);
 
-			this.updateRouterView();
+			this.updateView();
 		}
 
-		updateRouterView() {
+		/**
+		 * @description - Updates the view inside routerElement with a new page component
+		 */
+		updateView() {
 			this.routes.forEach(route => {
 				if (route.pathname === this.currentUri) {
 					this.routerElement.innerHTML = route.render();
@@ -159,14 +176,14 @@
 
 	var Detail$1 = new Detail;
 
-	const maybePrefixWithZero = num => {
+	const prefix = num => {
 		return num < 10 ? `0${num}` : num
 	};
 
 	var formatDate = date => {
 		const parsedDate = new Date(date);
-		const day = maybePrefixWithZero(parsedDate.getDay());
-		const month = maybePrefixWithZero(parsedDate.getDay());
+		const day = prefix(parsedDate.getDay());
+		const month = prefix(parsedDate.getDay());
 		const year = parsedDate.getFullYear();
 
 		return `${day}-${month}-${year}`
@@ -266,6 +283,12 @@
 	);
 	const { routerElement } = router;
 
+	const renderData = (data, node) => {
+		console.log(data);
+
+		node.insertAdjacentHTML('beforeend', new LaunchList(data).render());
+	};
+
 	document.getElementById('app')
 		.appendChild(routerElement);
 
@@ -275,11 +298,5 @@
 			renderData(launches, document.getElementById('app'));
 		})
 		.catch(console.error);
-
-	function renderData(data, node) {
-		console.log(data);
-
-		node.insertAdjacentHTML('beforeend', new LaunchList(data).render());
-	}
 
 }());

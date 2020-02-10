@@ -25,6 +25,8 @@ export class Router {
 			this.replace('#home')
 		}
 
+		this.replace(this.currentUri)
+
 		/*
 			Update the routerView when an `onpopstate` event fires (usually
 			happens when the user clicks browser buttons).
