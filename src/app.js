@@ -1,28 +1,21 @@
-import { Router, Route } from './router'
+import Route from './router/Route'
+import Router from './router'
 
 import Home from './pages/Home'
 import Detail from './pages/Detail'
-import LaunchList from './components/LaunchList'
 
-const endpoint = 'https://api.spacexdata.com/v3/launches'
-const router = new Router(
-	new Route('home', Home),
-	new Route('detail', Detail)
-)
-const { routerElement } = router
+export default class App {
+	constructor({ target }) {
+		this.router = new Router(
+			new Route('home', Home),
+			new Route('detail', Detail)
+		)
+		this.target = document.querySelector(target)
+		this.element = this.router.view.element
+		this.endpoint = 'https://api.spacexdata.com/v3/launches'
+	}
 
-const renderData = (data, node) => {
-	console.log(data)
-
-	node.insertAdjacentHTML('beforeend', new LaunchList(data).render())
+	init() {
+		this.target.appendChild(this.element)
+	}
 }
-
-document.getElementById('app')
-	.appendChild(routerElement)
-
-fetch(endpoint)
-	.then(response => response.json())
-	.then(launches => {
-		renderData(launches, document.getElementById('app'))
-	})
-	.catch(console.error)
