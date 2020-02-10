@@ -5,14 +5,14 @@ import {
 	pushState,
 	replaceState
 } from './lib/history-helpers'
+import RouterView from './RouterView'
 
-export class Router {
+export default class Router {
 	constructor(...routes) {
 		this.hasRouteListener = false
 		this.currentUri = window.location.hash
 		this.routes = routes
-		this.routerElement = document.createElement('div')
-		this.routerElement.setAttribute('data-router-view', true)
+		this.view = new RouterView(this)
 
 		if (!pushStateIsAvailable || !replaceStateIsAvailable) {
 			throw new Error('Push state is not available here, router will not work as expected...')
@@ -36,7 +36,7 @@ export class Router {
 				? event.state.page
 				: this.currentUri
 
-			this.updateView()
+			this.view.update(this.currentUri)
 		}
 	}
 
@@ -51,7 +51,7 @@ export class Router {
 
 		pushState({ page: this.currentUri }, this.currentUri)
 
-		this.updateView()
+		this.view.update(this.currentUri)
 	}
 
 	/**
@@ -65,70 +65,6 @@ export class Router {
 
 		replaceState({ page: this.currentUri }, this.currentUri)
 
-		this.updateView()
-	}
-
-	/**
-	 * @description - Updates the view inside routerElement with a new page component
-	 */
-	updateView() {
-		this.routes.forEach(route => {
-			if (route.pathname === this.currentUri) {
-				this.routerElement.innerHTML = route.render()
-			}
-		})
-
-		// Listen for router links on the page if the router isn't listening yet
-		if (!this.hasRouteListener) {
-			this.routerElement.addEventListener('click', event => {
-				const { target } = event
-				const isRouterLink = target.getAttribute('data-router-link') !== null
-
-				if (isRouterLink) {
-					event.preventDefault()
-
-					this.push(target.hash)
-				}
-			})
-
-			this.hasRouteListener = true
-		}
-	}
-}
-
-export class Route {
-	constructor(pathname, component) {
-		this.pathname = `#${pathname}`
-		this.component = component
-	}
-
-	render() {
-		return this.component.render()
-	}
-}
-
-export class RouterLink {
-	constructor(to, text, options) {
-		this.to = to
-		this.text = text
-		this.options = options || {}
-	}
-
-	maybeAddClasses() {
-		return this.options.classNames
-			? `class="${this.options.classNames.join(' ')}"`
-			: ''
-	}
-
-	render() {
-		return `
-			<a
-				${this.maybeAddClasses()}
-				href="#${this.to}"
-				data-router-link
-			>
-				${this.text}
-			</a>
-		`
+		this.view.update(this.currentUri)
 	}
 }
