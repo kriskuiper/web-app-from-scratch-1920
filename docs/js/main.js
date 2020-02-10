@@ -138,15 +138,131 @@
 		}
 	}
 
-	class RouterLink {
-		constructor(to, text, options) {
-			this.to = to;
-			this.text = text;
-			this.options = options || {};
+	class EventDispatcher {
+		constructor() {
+			this.events = {};
 		}
 
+		subscribe(eventName, callback) {
+			/*
+				Explicitly set the this context because we use our EventDispatcher
+				inside the store which has another this context
+			*/
+			const self = this;
+
+			/*
+				One event is equal to an array of callbacks that have to be fired.
+
+				If the event name is not known yet we set the value of that event to
+				an empty array so we can push the callback without having to do any
+				typechecking.
+			*/
+			if (!self.events.eventName) {
+				self.events[eventName] = [];
+			}
+
+			/*
+				We can now safely push the callback to the events from
+				our dispatcher
+			*/
+			self.events[eventName].push(callback);
+		}
+
+		dispatch(eventName, payload = {}) {
+			const self = this;
+
+			if (!self.events[eventName]) {
+				throw new ReferenceError(`Event with name: ${eventName} is not present in store. Are you sure you've subscribed something to that event?`)
+			}
+
+			/*
+				Fire off a callback for every subscriber that's subscribed
+				to the eventName
+			*/
+			self.events[eventName].map(callback => callback(payload));
+		}
+	}
+
+	class Store {
+		constructor({ initialState, mutations }) {
+			/*
+				Explicitly set the this context to the store since we're using our
+				dispatcher which has another this context.
+			*/
+			const self = this;
+
+			self.mutations = mutations || {};
+			self.events = new EventDispatcher;
+
+			self.state = new Proxy(initialState || {}, {
+				set(state, key, newValue) {
+					// Just set the value as you would do with an object
+					state[key] = newValue;
+
+					// Let all subscribed components know that state has changed
+					self.events.dispatch('stateChange', self.state);
+
+					return true
+				}
+			});
+		}
+
+		commit(mutationKey, payload) {
+			const self = this;
+
+			const isValidMutation = self.mutations[mutationKey] &&
+				typeof self.mutations[mutationKey] === 'function';
+
+			if (!isValidMutation) {
+				throw new Error(`Mutation ${mutationKey} does not exist.`)
+			}
+
+			const updatedState = self.mutations[mutationKey](self.state, payload);
+
+			self.state = {
+				...this.state,
+				...updatedState
+			};
+		}
+	}
+
+	const setSelectedData = (state, payload) => {
+		state.name = payload.name;
+
+		return state
+	};
+
+	var mutations = /*#__PURE__*/Object.freeze({
+		__proto__: null,
+		setSelectedData: setSelectedData
+	});
+
+	const initialState = {
+		items: []
+	};
+
+	var store = new Store({
+		initialState,
+		mutations
+	});
+
+	class Component {
+		constructor(props) {
+			this.props = props;
+
+			if (!this.render) {
+				throw new Error('Component needs a render function')
+			}
+
+			if (props && props.store instanceof Store) {
+				props.store.events.subscribe('stateChange', () => this.render());
+			}
+		}
+	}
+
+	class RouterLink extends Component {
 		maybeAddClasses() {
-			return this.options.classNames
+			return this.props.options && this.props.options.classNames
 				? `class="${this.options.classNames.join(' ')}"`
 				: ''
 		}
@@ -155,21 +271,25 @@
 			return `
 			<a
 				${this.maybeAddClasses()}
-				href="#${this.to}"
+				href="#${this.props.to}"
 				data-router-link
 			>
-				${this.text}
+				${this.props.text}
 			</a>
 		`
 		}
 	}
 
-	class Home {
+	class Home extends Component {
+		constructor() {
+			super({ store });
+		}
+
 		render() {
 			return `
 			<main>
 				<h1>Home page</h1>
-				${new RouterLink('detail', 'To detail page').render()}
+				${new RouterLink({ to: 'detail', text: 'Detail page' }).render()}
 			</main>
 		`
 		}
@@ -177,12 +297,12 @@
 
 	var Home$1 = new Home;
 
-	class Detail {
+	class Detail extends Component {
 		render() {
 			return `
 			<main>
 				<h1>Detail page</h1>
-				${new RouterLink('home', 'Back to home page').render()}
+				${new RouterLink({ to: 'home' , text: 'To homepage'}).render()}
 			</main>
 		`
 		}
