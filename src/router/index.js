@@ -34,7 +34,7 @@ export class Router {
 				? event.state.page
 				: this.currentUri
 
-			this.updateRouterView()
+			this.updateView()
 		}
 	}
 
@@ -43,7 +43,7 @@ export class Router {
 
 		pushState({ page: this.currentUri }, this.currentUri)
 
-		this.updateRouterView()
+		this.updateView()
 	}
 
 	replace(uri, queryParams) {
@@ -51,10 +51,10 @@ export class Router {
 
 		replaceState({ page: this.currentUri }, this.currentUri)
 
-		this.updateRouterView()
+		this.updateView()
 	}
 
-	updateRouterView() {
+	updateView() {
 		this.routes.forEach(route => {
 			if (route.pathname === this.currentUri) {
 				this.routerElement.innerHTML = route.render()
