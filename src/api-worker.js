@@ -5,13 +5,20 @@ class Api {
 		this.endpoint = 'https://api.spacexdata.com/v3/launches'
 	}
 
-	async get() {
-		fetch(this.endpoint)
-			.then(response => response.json())
-			.then(launches => {
-				console.log('Data from api worker: ', launches)
-			})
+	async getLaunches() {
+		const response = await fetch(this.endpoint)
+		const launches = await response.json()
+
+		return launches
+	}
+
+	async getLaunchByFlightNumber(flightNumber) {
+		const correctedUrl = `${this.endpoint}/${flightNumber}`
+		const response = await fetch(correctedUrl)
+		const launch = await response.json()
+
+		return launch
 	}
 }
 
-Comlink.expose(new Api)
+Comlink.expose(Api)
