@@ -164,7 +164,6 @@ class EventDispatcher {
 			We can now safely push the callback to the events from
 			our dispatcher
 		*/
-		console.log('subscribing... ', callback);
 		self.events[eventName].push(callback);
 	}
 
@@ -226,22 +225,22 @@ class Store {
 	}
 }
 
-const setSelectedData = (state, payload) => {
-	state.name = payload.name;
+const setData = (state, payload) => {
+	state.launches = payload.launches;
 
 	return state
 };
 
 var mutations = /*#__PURE__*/Object.freeze({
 	__proto__: null,
-	setSelectedData: setSelectedData
+	setData: setData
 });
 
 const initialState = {
 	items: []
 };
 
-var store = new Store({
+var Store$1 = new Store({
 	initialState,
 	mutations
 });
@@ -282,13 +281,24 @@ class RouterLink extends Component {
 
 class Home extends Component {
 	constructor() {
-		super({ store });
+		super({ store: Store$1 });
+	}
+
+	renderLaunches(launches) {
+		if (!launches) return 'Loading launches...'
+
+		return launches.map(launch => {
+			return `
+				<h2>${launch.flight_number}</h2>
+			`
+		})
 	}
 
 	render() {
 		return `
 			<main>
 				<h1>Home page</h1>
+				${console.log(this.props.store.state)}
 				${new RouterLink({ to: 'detail', text: 'Detail page' }).render()}
 			</main>
 		`
@@ -310,6 +320,8 @@ class Detail extends Component {
 
 var Detail$1 = new Detail;
 
+const SET_DATA = 'setData';
+
 class App {
 	constructor({ target }) {
 		this.router = new Router(
@@ -317,15 +329,19 @@ class App {
 			new Route('detail', Detail$1)
 		);
 		this.target = document.querySelector(target);
-		this.element = this.router.view.element;
+		this.element = this.router.view.element,
+		this.store = Store$1;
 	}
 
-	init() {
+	async init() {
 		if (window.Worker) {
-			const worker = new Worker('js/api-worker.js');
-			const Api = wrap(worker);
+			const Api = wrap(new Worker('js/api-worker.js'));
+			const apiInstance = await new Api;
 
-			Api.get();
+			apiInstance.getLaunches()
+				.then(launches => {
+					this.store.commit(SET_DATA, { launches });
+				});
 		}
 
 		this.target.appendChild(this.element);
