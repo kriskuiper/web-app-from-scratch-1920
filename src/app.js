@@ -1,3 +1,5 @@
+import * as Comlink from 'https://unpkg.com/comlink@alpha/dist/esm/comlink.mjs'
+
 import Route from './router/Route'
 import Router from './router'
 
@@ -16,11 +18,10 @@ export default class App {
 
 	init() {
 		if (window.Worker) {
-			const worker = new Worker('js/worker.js')
+			const worker = new Worker('js/api-worker.js')
+			const Api = Comlink.wrap(worker)
 
-			worker.addEventListener('message', event => {
-				console.log(event.data)
-			})
+			Api.get()
 		}
 
 		this.target.appendChild(this.element)

@@ -6,7 +6,7 @@ export default [
 		input: 'src/main.js',
 		output: {
 			file: 'docs/js/main.js',
-			format: 'iife',
+			format: 'esm',
 		},
 		plugins: [
 			resolve({
@@ -17,10 +17,10 @@ export default [
 		]
 	},
 	{
-		input: 'src/worker.js',
+		input: 'src/api-worker.js',
 		output: {
-			file: 'docs/js/worker.js',
-			format: 'iife',
+			file: 'docs/js/api-worker.js',
+			format: 'umd',
 		},
 		plugins: [
 			resolve()
