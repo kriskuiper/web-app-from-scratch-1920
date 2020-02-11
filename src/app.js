@@ -6,6 +6,9 @@ import Router from './router'
 import Home from './pages/Home'
 import Detail from './pages/Detail'
 
+import Store from './store'
+import { SET_DATA } from './store/mutation-keys'
+
 export default class App {
 	constructor({ target }) {
 		this.router = new Router(
@@ -13,15 +16,19 @@ export default class App {
 			new Route('detail', Detail)
 		)
 		this.target = document.querySelector(target)
-		this.element = this.router.view.element
+		this.element = this.router.view.element,
+		this.store = Store
 	}
 
-	init() {
+	async init() {
 		if (window.Worker) {
-			const worker = new Worker('js/api-worker.js')
-			const Api = Comlink.wrap(worker)
+			const Api = Comlink.wrap(new Worker('js/api-worker.js'))
+			const apiInstance = await new Api
 
-			Api.get()
+			apiInstance.getLaunches()
+				.then(launches => {
+					this.store.commit(SET_DATA, { launches })
+				})
 		}
 
 		this.target.appendChild(this.element)
