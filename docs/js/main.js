@@ -38,7 +38,7 @@ class RouterView {
 		this.hasRouteListener = false;
 		this.router = router;
 		this.element = document.createElement('div');
-		this.element.setAttribute('data-router-link', true);
+		this.element.setAttribute('data-router-view', true);
 	}
 
 	/**
