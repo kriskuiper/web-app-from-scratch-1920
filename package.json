@@ -3,10 +3,10 @@
  "version": "1.0.0",
  "main": "index.js",
  "scripts": {
-	"build": "rollup -c",
-	"dev": "run-p serve watch",
-	"watch": "rollup -c --watch",
-	"serve": "sirv docs --port 3031 --single --dev"
+  "build": "rollup -c",
+  "dev": "run-p serve watch",
+  "watch": "rollup -c --watch",
+  "serve": "sirv docs --port 3031 --single --dev"
  },
  "repository": "git@github.com:kriskuiper/web-app-from-scratch-1920.git",
  "author": "Kris <kriskuiper74@gmail.com>",

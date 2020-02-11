@@ -1,3 +1,5 @@
+import * as Comlink from 'https://unpkg.com/comlink@alpha/dist/esm/comlink.mjs'
+
 import Route from './router/Route'
 import Router from './router'
 
@@ -12,14 +14,14 @@ export default class App {
 		)
 		this.target = document.querySelector(target)
 		this.element = this.router.view.element
-		this.endpoint = 'https://api.spacexdata.com/v3/launches'
 	}
 
 	init() {
 		if (window.Worker) {
-			const worker = new Worker('js/worker.js')
+			const worker = new Worker('js/api-worker.js')
+			const Api = Comlink.wrap(worker)
 
-			worker.postMessage({ name: 'henk' })
+			Api.get()
 		}
 
 		this.target.appendChild(this.element)
