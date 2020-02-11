@@ -1,1 +1,1 @@
-const SET_SELECTED_DATA = 'setSelectedData'
+export const SET_DATA = 'setData'

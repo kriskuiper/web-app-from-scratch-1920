@@ -1,5 +1,5 @@
-export const setSelectedData = (state, payload) => {
-	state.name = payload.name
+export const setData = (state, payload) => {
+	state.launches = payload.launches
 
 	return state
 }
