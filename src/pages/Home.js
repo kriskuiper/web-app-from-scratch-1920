@@ -21,7 +21,6 @@ class Home extends Component {
 		return `
 			<main>
 				<h1>Home page</h1>
-				${console.log(this.props.store.state)}
 				${new RouterLink({ to: 'detail', text: 'Detail page' }).render()}
 			</main>
 		`
