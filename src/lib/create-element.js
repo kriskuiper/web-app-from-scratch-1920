@@ -1,17 +1,19 @@
-export default (tag, attributes) => {
-	const element = document.createElement(tag)
+import addAttributes from './add-attributes'
 
-	if (typeof element !== HTMLElement) {
+/**
+ * @description Creates an HTML element from a given tag
+ * @param {string} tag Type of HTML element to create
+ * @param {Object} attributes Key-value pairs of attributes to add
+ */
+
+export default (tag, attributes) => {
+	const $element = document.createElement(tag)
+
+	if (typeof $element !== HTMLElement) {
 		throw new Error(`${tag} is not an existing HTML element`)
 	}
 
-	for (let [name, value] of Object.entries(attributes)) {
-		if (name === 'class') {
-			value.forEach(element.classList.add)
-		} else {
-			element.setAttribute(name, value)
-		}
-	}
+	addAttributes($element, attributes)
 
-	return element
+	return $element
 }
