@@ -38,10 +38,19 @@ The user can choose which data they want to see as long if it's one of the follo
 User can see details of a specific launch or rocket on a detail page. The detail page consists of a description, some minor details like the launch site and a video of the launch if available.
 
 ## API
-For this project I used the SpaceX API. You can view the docs [here]().
+For this project I used the SpaceX API. You can view the docs [here](https://docs.spacexdata.com/?version=latest).
 
-### Overview
-The SpaceX API is an API that shows lots of SpaceX data.
+### Rate limiting
+As quoted by the docs:
+> The API has a rate limit of 50 req/sec per IP address, if exceeded, a response of 429 will be given until the rate drops back below 50 req/sec
+
+### Caching
+Again, as quoted by the docs:
+> In general, the standard cache times are as follows:
+> - launches - 30 seconds
+> - ships, payloads, roadster - 5 minutes
+> - capsules, cores, launchpads, landpads - 1 hour
+> - dragons, rockets, missions, history, company info - 24 hours
 
 ### Endpoints used
 The application uses the following endpoints of the SpaceX API:
