@@ -30,15 +30,17 @@ export default class Store {
 		const isValidMutation = self.mutations[mutationKey] &&
 			typeof self.mutations[mutationKey] === 'function'
 
-		if (!isValidMutation) {
-			throw new Error(`Mutation ${mutationKey} does not exist.`)
+		if (isValidMutation) {
+			const updatedState = self.mutations[mutationKey](self.state, payload)
+
+			self.state = {
+				...this.state,
+				...updatedState
+			}
+
+			return self.state
 		}
 
-		const updatedState = self.mutations[mutationKey](self.state, payload)
-
-		self.state = {
-			...this.state,
-			...updatedState
-		}
+		throw new Error(`Mutation ${mutationKey} does not exist.`)
 	}
 }
