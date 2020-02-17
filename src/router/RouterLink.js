@@ -1,21 +1,26 @@
+import redom from 'redom'
+
 import Component from '../lib/Component'
 
 export default class RouterLink extends Component {
-	maybeAddClasses() {
-		return this.props.options && this.props.options.classNames
-			? `class="${this.options.classNames.join(' ')}"`
-			: ''
+	constructor(props) {
+		super({
+			element: 'a',
+			to: `#${props.to}`,
+			text: props.text
+		})
 	}
 
 	render() {
-		return `
-			<a
-				${this.maybeAddClasses()}
-				href="#${this.props.to}"
-				data-router-link
-			>
-				${this.props.text}
-			</a>
-		`
+		redom.setAttr(
+			this.element,
+			{
+				href: this.props.to,
+				'data-router-link': '',
+				textContent: this.props.text
+			}
+		)
+
+		return this.element
 	}
 }
