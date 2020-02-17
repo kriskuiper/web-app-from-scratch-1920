@@ -18,5 +18,7 @@
   "rollup": "^1.31.0",
   "sirv-cli": "^0.4.5"
  },
- "dependencies": {}
+ "dependencies": {
+  "redom": "^3.25.1"
+ }
 }

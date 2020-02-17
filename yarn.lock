@@ -411,6 +411,11 @@ read-pkg@^3.0.0:
     normalize-package-data "^2.3.2"
     path-type "^3.0.0"
 
+redom@^3.25.1:
+  version "3.25.1"
+  resolved "https://registry.yarnpkg.com/redom/-/redom-3.25.1.tgz#2a17ec84536c46a433e8f55093efca567b1c1abb"
+  integrity sha512-NSomVzF6XUlZA2hlRnHUe9OQPCrZKMM4hP+L6o917HdR8e2w5iB6dI/gXwP2jlIdjMjMiq/PaPKUiwGIdi3RJw==
+
 resolve@^1.10.0, resolve@^1.11.0, resolve@^1.14.2:
   version "1.15.0"
   resolved "https://registry.yarnpkg.com/resolve/-/resolve-1.15.0.tgz#1b7ca96073ebb52e741ffd799f6b39ea462c67f5"

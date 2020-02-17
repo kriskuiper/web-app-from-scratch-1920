@@ -1,30 +1,35 @@
-import store from '../store'
+import redom from 'redom'
+
 import Component from '../lib/Component'
 import RouterLink from '../router/RouterLink'
+import LaunchList from '../components/LaunchList'
 
 class Home extends Component {
 	constructor() {
-		super({ store })
-	}
-
-	renderLaunches(launches) {
-		if (!launches) return 'Loading launches...'
-
-		return launches.map(launch => {
-			return `
-				<h2>${launch.flight_number}</h2>
-			`
+		super({
+			element: 'main'
 		})
 	}
 
 	render() {
-		return `
-			<main>
-				<h1>Home page</h1>
-				${console.log(this.props.store.state)}
-				${new RouterLink({ to: 'detail', text: 'Detail page' }).render()}
-			</main>
-		`
+		if (!this.element.firstElementChild) {
+			redom.mount(
+				this.element,
+				redom.el('h1', { textContent: 'Homepage' })
+			)
+
+			redom.mount(
+				this.element,
+				new RouterLink({ to: 'detail', text: 'Go to detail' }).render()
+			)
+
+			redom.mount(
+				this.element,
+				new LaunchList().render()
+			)
+		}
+
+		return this.element
 	}
 }
 

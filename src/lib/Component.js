@@ -1,3 +1,4 @@
+import redom from 'redom'
 import Store from '../store/Store'
 
 export default class Component {
@@ -8,8 +9,14 @@ export default class Component {
 			throw new Error('Component needs a render function')
 		}
 
+		if (props && props.element) {
+			this.element = redom.el(props.element)
+		}
+
 		if (props && props.store instanceof Store) {
-			props.store.events.subscribe('stateChange', () => this.render())
+			const { events, state } = props.store
+
+			events.subscribe('stateChange', () => this.update(state))
 		}
 	}
 }

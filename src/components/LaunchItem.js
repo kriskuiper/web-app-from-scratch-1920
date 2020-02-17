@@ -1,3 +1,5 @@
+import redom from 'redom'
+
 import Component from '../lib/Component'
 import RouterLink from '../router/RouterLink'
 import formatDate from '../lib/format-date'
@@ -17,7 +19,10 @@ const getIcon = successState => {
 
 export default class LaunchItem extends Component {
 	constructor(props) {
-		super(props)
+		super({
+			element: 'article.launch-item',
+			...props
+		})
 
 		this.name = props.mission_name
 		this.launchSite = props.launch_site.site_name_long
@@ -35,40 +40,36 @@ export default class LaunchItem extends Component {
 	}
 
 	render() {
-		return `
-			<article
-				class="launch-item"
-				${maybeSetDataSuccess(this.isSuccess)}
-			>
-				<header class="launch-item__header">
-					<img
-						class="launch-item__icon"
-						src=${getIcon(this.isSuccess)}
-					/>
-					<div>
-						<h3 class="launch-item__title">${this.name}</h3>
-						<p class="launch-item__date">Launched: ${formatDate(this.launchDate)}</p>
-					</div>
-				</header>
-				<div class="fixed-ratio fixed-ratio-1by1">
-					<div class="fixed-ratio-content">
-						<img
-							class="launch-item__image"
-							src="${this.fallbackImage}"
-							srcset="${this.imageSrcSet}"
-							sizes="${this.imageSizes}"
-							alt="${this.name} mission logo"
-						/>
-					</div>
-				</div>
-				<div class="launch-item__details">
-					<ul class="unstyled-list">
-						<li>Rocket: ${this.rocketName}</li>
-						<li>Launch site: ${this.launchSite}</li>
-					</ul>
-				</div>
-				${new RouterLink('/detail', 'Details').render()}
-			</article>
-		`
+		this.element =
+			redom.el('article.launch-item',
+				redom.el('header.launch-item__header',
+					redom.el('img.launch-item__icon', { src: getIcon(this.isSuccess) }),
+					redom.el('div',
+						redom.el('h3', { textContent: this.name }),
+						redom.el('p', { textContent: `Launched: ${formatDate(this.launchDate)}` })
+					)
+				),
+				redom.el('picture.fixed-ratio.fixed-ratio-1by1',
+					redom.el('img.launch-item__image.fixed-ratio-content', {
+						src: this.fallbackImage,
+						srcSet: this.imageSrcSet,
+						sizes: this.imageSizes,
+						alt: `${this.name} mission logo`
+					})
+				),
+				redom.el('div.launch-item__details',
+					redom.el('ul.unstyled-list',
+						redom.el('li', { textContent: `Rocket: ${this.rocketName}` }),
+						redom.el('li', { textContent: `Launch site: ${this.launchSite}` })
+					)
+				)
+			)
+
+			redom.mount(
+				this.element,
+				new RouterLink({ to: 'detail', text: 'See details' }).render()
+			)
+
+		return this.element
 	}
 }
