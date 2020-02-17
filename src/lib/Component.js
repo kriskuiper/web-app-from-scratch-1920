@@ -1,15 +1,5 @@
+import redom from 'redom'
 import Store from '../store/Store'
-
-/*
- * Every component should have:
- * el: el(tag)
- * update method: update(data) {} // what to do with updated data etc.
- * render method: on initial render
- *
- * call update on state change with store.state as param
-*/
-
-
 
 export default class Component {
 	constructor(props) {
@@ -19,8 +9,14 @@ export default class Component {
 			throw new Error('Component needs a render function')
 		}
 
+		if (props && props.element) {
+			this.element = redom.el(props.element)
+		}
+
 		if (props && props.store instanceof Store) {
-			props.store.events.subscribe('stateChange', () => this.render())
+			const { events, state } = props.store
+
+			events.subscribe('stateChange', () => this.update(state))
 		}
 	}
 }
