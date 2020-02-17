@@ -1,14 +1,29 @@
+import redom from 'redom'
+
 import Component from '../lib/Component'
 import RouterLink from '../router/RouterLink'
 
 class Detail extends Component {
+	constructor() {
+		super({
+			element: 'main'
+		})
+	}
+
 	render() {
-		return `
-			<main>
-				<h1>Detail page</h1>
-				${new RouterLink({ to: 'home' , text: 'To homepage'}).render()}
-			</main>
-		`
+		if (!this.element.firstChild) {
+			redom.mount(
+				this.element,
+				redom.el('h1', { textContent: 'Detail page' })
+			)
+
+			redom.mount(
+				this.element,
+				new RouterLink({ to: 'home', text: 'Go to home' }).render()
+			)
+		}
+
+		return this.element
 	}
 }
 

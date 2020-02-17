@@ -1,9 +1,15 @@
+import redom from 'redom'
+import clearChildren from '../lib/clear-children'
+
 export default class RouterView {
 	constructor(router) {
 		this.hasRouteListener = false
 		this.router = router
-		this.element = document.createElement('div')
-		this.element.setAttribute('data-router-link', true)
+		this.element = redom.el('div')
+
+		redom.setAttr(this.element, {
+			'data-router-view': true
+		})
 	}
 
 	/**
@@ -12,7 +18,19 @@ export default class RouterView {
 	update() {
 		this.router.routes.forEach(route => {
 			if (route.pathname === this.router.currentUri) {
-				this.element.innerHTML = route.render()
+
+				// Replace existing page with new page
+				if (this.element.firstElementChild) {
+					redom.unmount(
+						this.element,
+						this.element.firstElementChild
+					)
+				}
+
+				redom.mount(
+					this.element,
+					route.component.render()
+				)
 			}
 		})
 
