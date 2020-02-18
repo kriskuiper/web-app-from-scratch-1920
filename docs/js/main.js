@@ -2,7 +2,7 @@ import { wrap } from 'https://unpkg.com/comlink@alpha/dist/esm/comlink.mjs';
 
 class Route {
 	constructor(pathname, component) {
-		this.pathname = `#${pathname}`;
+		this.pathname = pathname;
 		this.component = component;
 	}
 
@@ -121,14 +121,16 @@ var Store$1 = new Store({
 	mutations
 });
 
-var getCorrectedUri = (uri, queryParams) => {
-	if (!uri) {
-		throw new ReferenceError('Please provide a uri')
+const replaceStateIsAvailable = typeof window !== 'undefined' &&
+	window.history &&
+	window.history.replaceState;
+
+var replaceState = (uri) => {
+	if (replaceStateIsAvailable) {
+		return window.history.replaceState({ page: uri }, null, uri)
 	}
 
-	return queryParams
-		? `${uri}?${queryParams}`
-		: uri
+	throw new Error('Replace state is not available, please update your browser.')
 };
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
@@ -931,8 +933,7 @@ class RouterView {
 	 */
 	update() {
 		this.router.routes.forEach(route => {
-			if (route.pathname === this.router.currentUri) {
-
+			if (route.pathname === this.router.currentRoute.pathname) {
 				// Replace existing page with new page
 				if (this.element.firstElementChild) {
 					redom$1.unmount(
@@ -1027,18 +1028,19 @@ var parseRoute = (hashRoute) => {
 class Router {
 	constructor(...routes) {
 		this.hasRouteListener = false;
-		this.currentUri = window.location.hash;
+		this.currentRoute = parseRoute(window.location.hash);
 		this.routes = routes;
 		this.view = new RouterView(this);
 
 		/*
-			If there's no hash present, then replace / with #home
+			If there's no hash present, then replace / with #/home
 		*/
-		if (!this.currentUri) {
+
+		if (this.currentRoute.pathname === '/') {
 			this.replace('#/home');
 		}
 
-		this.replace(this.currentUri);
+		this.replace(window.location.hash);
 
 		/*
 			Update the routerView when an `onpopstate` event fires (usually
@@ -1060,8 +1062,10 @@ class Router {
 	 * @param {string} queryParams - queryParams to add to the hash
 	 * @example - Router.replace('#home', '?my-query=awesome')
 	 */
-	replace(uri, queryParams) {
-		this.currentUri = getCorrectedUri(uri, queryParams);
+	replace(uri) {
+		this.currentRoute = parseRoute(uri);
+
+		replaceState(uri);
 
 		this.view.update();
 	}
@@ -1099,6 +1103,9 @@ class Page extends Component {
 			this.route = payload.route;
 		});
 	}
+
+	// TODO: fix this in a nicer way
+	update() {}
 }
 
 class RouterLink extends Component {
