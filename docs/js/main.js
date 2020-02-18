@@ -821,17 +821,6 @@ var redom = createCommonjsModule(function (module, exports) {
 
 var redom$1 = unwrapExports(redom);
 
-/**
- * @description Removes all childnodes inside of a parent node
- * @param {HTMLElement} $parent Parent node to remove all childs from
- */
-
-var clearChildren = ($parent) => {
-	while ($parent.firstChild) {
-		$parent.removeChild($parent.firstChild);
-	}
-};
-
 class RouterView {
 	constructor(router) {
 		this.hasRouteListener = false;
@@ -951,6 +940,20 @@ class Router {
 	}
 }
 
+var parseRoute = (route) => {
+	const pathnameRegex = new RegExp(/\/(.*)\//);
+	const queryRegex = new RegExp(/\?(.*)/);
+	const paramsRegex = new RegExp(/\/(.*)\?/);
+
+	console.log(route.match(pathnameRegex));
+	console.log(route.match(paramsRegex));
+	console.log(route.match(queryRegex));
+
+	return {
+
+	}
+};
+
 class EventDispatcher {
 	constructor() {
 		this.events = {};
@@ -1026,16 +1029,18 @@ class Store {
 		const isValidMutation = self.mutations[mutationKey] &&
 			typeof self.mutations[mutationKey] === 'function';
 
-		if (!isValidMutation) {
-			throw new Error(`Mutation ${mutationKey} does not exist.`)
+		if (isValidMutation) {
+			const updatedState = self.mutations[mutationKey](self.state, payload);
+
+			self.state = {
+				...this.state,
+				...updatedState
+			};
+
+			return self.state
 		}
 
-		const updatedState = self.mutations[mutationKey](self.state, payload);
-
-		self.state = {
-			...this.state,
-			...updatedState
-		};
+		throw new Error(`Mutation ${mutationKey} does not exist.`)
 	}
 }
 
@@ -1052,9 +1057,26 @@ class Component {
 		}
 
 		if (props && props.store instanceof Store) {
-			const { events, state } = props.store;
+			props.store.events.subscribe('stateChange', newState => this.update(newState));
+		}
+	}
+}
 
-			events.subscribe('stateChange', () => this.update(state));
+class Page extends Component {
+	constructor(props) {
+		super({
+			route: parseRoute(window.location.hash),
+			...props
+		});
+
+		this.route = props.route ? props.route : '';
+
+		if (this.route) {
+			const { events } = props.store;
+
+			events.subscribe('routeChange', (payload) => {
+				this.route = payload.route;
+			});
 		}
 	}
 }
@@ -1101,6 +1123,17 @@ var Store$1 = new Store({
 	initialState,
 	mutations
 });
+
+/**
+ * @description Removes all childnodes inside of a parent node
+ * @param {HTMLElement} $parent Parent node to remove all childs from
+ */
+
+var clearChildren = ($parent) => {
+	while ($parent.firstChild) {
+		$parent.removeChild($parent.firstChild);
+	}
+};
 
 const prefix = num => {
 	return num < 10 ? `0${num}` : num
@@ -1215,7 +1248,7 @@ class LaunchList extends Component {
 	}
 }
 
-class Home extends Component {
+class Home extends Page {
 	constructor() {
 		super({
 			element: 'main'
@@ -1231,7 +1264,7 @@ class Home extends Component {
 
 			redom$1.mount(
 				this.element,
-				new RouterLink({ to: 'detail', text: 'Go to detail' }).render()
+				new RouterLink({ to: '/detail', text: 'Go to detail' }).render()
 			);
 
 			redom$1.mount(
@@ -1246,7 +1279,7 @@ class Home extends Component {
 
 var Home$1 = new Home;
 
-class Detail extends Component {
+class Detail extends Page {
 	constructor() {
 		super({
 			element: 'main'
@@ -1262,7 +1295,7 @@ class Detail extends Component {
 
 			redom$1.mount(
 				this.element,
-				new RouterLink({ to: 'home', text: 'Go to home' }).render()
+				new RouterLink({ to: '/home', text: 'Go to home' }).render()
 			);
 		}
 
@@ -1277,8 +1310,8 @@ const SET_DATA = 'setData';
 class App {
 	constructor({ target }) {
 		this.router = new Router(
-			new Route('home', Home$1),
-			new Route('detail', Detail$1)
+			new Route('/home', Home$1),
+			new Route('/detail', Detail$1)
 		);
 		this.target = document.querySelector(target);
 		this.element = this.router.view.element,
@@ -1287,10 +1320,10 @@ class App {
 
 	async init() {
 		if (window.Worker) {
-			const Api = wrap(new Worker('js/api-worker.js'));
-			const apiInstance = await new Api;
+			const apiWorker = wrap(new Worker('js/api-worker.js'));
+			const Api = await new apiWorker;
 
-			apiInstance.getLaunches()
+			Api.getLaunches()
 				.then(launches => {
 					this.store.commit(SET_DATA, { launches });
 				});
