@@ -1048,11 +1048,6 @@ class Router {
 		*/
 		window.onhashchange = () => {
 			this.replace(window.location.hash);
-
-			// Let the pages know the route has changed
-			Store$1.events.dispatch('routeChange', {
-				route: parseRoute(window.location.hash)
-			});
 		};
 	}
 
@@ -1066,6 +1061,10 @@ class Router {
 		this.currentRoute = parseRoute(uri);
 
 		replaceState(uri);
+
+		Store$1.events.dispatch('routeChange', {
+			route: parseRoute(uri)
+		});
 
 		this.view.update();
 	}
