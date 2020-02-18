@@ -28,11 +28,6 @@ export default class Router {
 		*/
 		window.onhashchange = () => {
 			this.replace(window.location.hash)
-
-			// Let the pages know the route has changed
-			store.events.dispatch('routeChange', {
-				route: parseRoute(window.location.hash)
-			})
 		}
 	}
 
@@ -46,6 +41,10 @@ export default class Router {
 		this.currentRoute = parseRoute(uri)
 
 		replaceState(uri)
+
+		store.events.dispatch('routeChange', {
+			route: parseRoute(uri)
+		})
 
 		this.view.update()
 	}
