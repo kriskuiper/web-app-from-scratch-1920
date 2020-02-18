@@ -1,5 +1,4 @@
 import redom from 'redom'
-import clearChildren from '../lib/clear-children'
 
 export default class RouterView {
 	constructor(router) {
