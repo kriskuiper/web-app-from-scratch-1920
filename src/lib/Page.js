@@ -17,4 +17,7 @@ export default class Page extends Component {
 			this.route = payload.route
 		})
 	}
+
+	// TODO: fix this in a nicer way
+	update() {}
 }
