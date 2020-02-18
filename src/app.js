@@ -12,8 +12,8 @@ import { SET_DATA } from './store/mutation-keys'
 export default class App {
 	constructor({ target }) {
 		this.router = new Router(
-			new Route('home', Home),
-			new Route('detail', Detail)
+			new Route('/home', Home),
+			new Route('/detail', Detail)
 		)
 		this.target = document.querySelector(target)
 		this.element = this.router.view.element,
@@ -22,10 +22,10 @@ export default class App {
 
 	async init() {
 		if (window.Worker) {
-			const Api = Comlink.wrap(new Worker('js/api-worker.js'))
-			const apiInstance = await new Api
+			const apiWorker = Comlink.wrap(new Worker('js/api-worker.js'))
+			const Api = await new apiWorker
 
-			apiInstance.getLaunches()
+			Api.getLaunches()
 				.then(launches => {
 					this.store.commit(SET_DATA, { launches })
 				})
