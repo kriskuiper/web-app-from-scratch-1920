@@ -1,9 +1,9 @@
 import redom from 'redom'
 
-import Component from '../lib/Component'
+import Page from '../lib/Page'
 import RouterLink from '../router/RouterLink'
 
-class Detail extends Component {
+class Detail extends Page {
 	constructor() {
 		super({
 			element: 'main'
@@ -19,7 +19,7 @@ class Detail extends Component {
 
 			redom.mount(
 				this.element,
-				new RouterLink({ to: 'home', text: 'Go to home' }).render()
+				new RouterLink({ to: '/home', text: 'Go to home' }).render()
 			)
 		}
 
