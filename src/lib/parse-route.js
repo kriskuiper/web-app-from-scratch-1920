@@ -1,21 +1,31 @@
-const queriesToObject = (queries) => {
-	// Remove the ? and split on every & to get seperate queries
+const toObject = (queryString) => {
+	const queries = queryString.replace('?', '')
+	const splittedQueries = queries.split('&')
 
-	// Create key-value pairs by splitting the = and return key: value
+	if (queries && splittedQueries) {
+		return splittedQueries.reduce((queryObject, splittedQuery) => {
+			const keyValuePair = splittedQuery.split('=')
 
+			// Set the key (before the =) equal to the value (after the =)
+			queryObject[keyValuePair[0]] = keyValuePair[1]
+
+			return queryObject
+		}, {})
+	}
+
+	return {}
 }
 
 export default (route) => {
-	const paramsIndex = route.indexOf(':')
-	const queryIndex = route.indexOf('?')
+	const pathnameRegex = new RegExp(/\/(.*)\//)
+	const queryRegex = new RegExp(/\?(.*)/)
+	const paramsRegex = new RegExp(/\/(.*)\?/)
 
-	const pathname = route.slice(0, paramsIndex)
-	const params = route.slice(paramsIndex, queryIndex)
-	const queries = route.slice(queryIndex, route.length)
+	console.log(route.match(pathnameRegex))
+	console.log(route.match(paramsRegex))
+	console.log(route.match(queryRegex))
 
 	return {
-		pathname,
-		params,
-		queriesToObject(queries)
+
 	}
 }
