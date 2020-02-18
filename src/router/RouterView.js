@@ -16,8 +16,7 @@ export default class RouterView {
 	 */
 	update() {
 		this.router.routes.forEach(route => {
-			if (route.pathname === this.router.currentUri) {
-
+			if (route.pathname === this.router.currentRoute.pathname) {
 				// Replace existing page with new page
 				if (this.element.firstElementChild) {
 					redom.unmount(
