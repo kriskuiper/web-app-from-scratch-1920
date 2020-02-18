@@ -11,6 +11,116 @@ class Route {
 	}
 }
 
+class EventDispatcher {
+	constructor() {
+		this.events = {};
+	}
+
+	subscribe(eventName, callback) {
+		/*
+			Explicitly set the this context because we use our EventDispatcher
+			inside the store which has another this context
+		*/
+		const self = this;
+
+		/*
+			One event is equal to an array of callbacks that have to be fired.
+
+			If the event name is not known yet we set the value of that event to
+			an empty array so we can push the callback without having to do any
+			typechecking.
+		*/
+		if (!self.events.eventName) {
+			self.events[eventName] = [];
+		}
+
+		/*
+			We can now safely push the callback to the events from
+			our dispatcher
+		*/
+		self.events[eventName].push(callback);
+	}
+
+	dispatch(eventName, payload = {}) {
+		const self = this;
+
+		if (!self.events[eventName]) {
+			throw new ReferenceError(`Event with name: ${eventName} is not present in store. Are you sure you've subscribed something to that event?`)
+		}
+
+		/*
+			Fire off a callback for every subscriber that's subscribed
+			to the eventName
+		*/
+		self.events[eventName].map(callback => callback(payload));
+	}
+}
+
+class Store {
+	constructor({ initialState, mutations }) {
+		/*
+			Explicitly set the this context to the store since we're using our
+			dispatcher which has another this context.
+		*/
+		const self = this;
+
+		self.mutations = mutations || {};
+		self.events = new EventDispatcher;
+
+		self.state = new Proxy(initialState || {}, {
+			set(state, key, newValue) {
+				// Just set the value as you would do with an object
+				state[key] = newValue;
+
+				// Let all subscribed components know that state has changed
+				self.events.dispatch('stateChange', self.state);
+
+				return true
+			}
+		});
+	}
+
+	commit(mutationKey, payload) {
+		const self = this;
+
+		const isValidMutation = self.mutations[mutationKey] &&
+			typeof self.mutations[mutationKey] === 'function';
+
+		if (isValidMutation) {
+			const updatedState = self.mutations[mutationKey](self.state, payload);
+
+			self.state = {
+				...this.state,
+				...updatedState
+			};
+
+			return self.state
+		}
+
+		throw new Error(`Mutation ${mutationKey} does not exist.`)
+	}
+}
+
+const setData = (state, payload) => {
+	state.launches = payload.launches;
+
+	return state
+};
+
+var mutations = /*#__PURE__*/Object.freeze({
+	__proto__: null,
+	setData: setData
+});
+
+const initialState = {
+	items: []
+};
+
+var Store$1 = new Store({
+	initialState,
+	mutations
+});
+
 var getCorrectedUri = (uri, queryParams) => {
 	if (!uri) {
 		throw new ReferenceError('Please provide a uri')
@@ -19,22 +129,6 @@ var getCorrectedUri = (uri, queryParams) => {
 	return queryParams
 		? `${uri}?${queryParams}`
 		: uri
-};
-
-const pushStateIsAvailable = typeof window !== 'undefined'
-	&& window.history
-	&& window.history.pushState;
-
-const replaceStateIsAvailable = typeof window !== 'undefined'
-	&& window.history
-	&& window.history.replaceState;
-
-const replaceState = (state, newUri) => {
-	window.history.replaceState(state, null, newUri);
-};
-
-const pushState = (state, newUri) => {
-	window.history.pushState(state, null, newUri);
 };
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
@@ -853,30 +947,82 @@ class RouterView {
 				);
 			}
 		});
-
-		// Listen for router links on the page if the router isn't listening yet
-		if (!this.hasRouteListener) {
-			this.element.addEventListener('click', event => {
-				const { target } = event;
-				const isRouterLink = target.getAttribute('data-router-link') !== null;
-
-				if (isRouterLink) {
-					event.preventDefault();
-
-					/*
-						TODO:
-						This maybe has to be refactored as it's not really 'seperation
-						of concerns'. Now the router view is dependent on a push method
-						on the router
-					*/
-					this.router.push(target.hash);
-				}
-			});
-
-			this.hasRouteListener = true;
-		}
 	}
 }
+
+const toObject = (queryString) => {
+	const queries = queryString.replace('?', '');
+	const splittedQueries = queries.split('&');
+
+	if (queries && splittedQueries) {
+		return splittedQueries.reduce((queryObject, splittedQuery) => {
+			const keyValuePair = splittedQuery.split('=');
+
+			// Set the key (before the =) equal to the value (after the =)
+			queryObject[keyValuePair[0]] = keyValuePair[1];
+
+			return queryObject
+		}, {})
+	}
+
+	return {}
+};
+
+const stripHash = (hashRoute) => {
+	return hashRoute.replace('#/', '')
+};
+
+const getQueries = (route) => {
+	const queryIndex = route.indexOf('?');
+
+	if (queryIndex !== -1) {
+		return route.slice(queryIndex, route.length)
+	}
+
+	return ''
+};
+
+const getParams = (route) => {
+	// Capture a group from / to ? of a query
+	const paramsToQueryRegex = new RegExp(/\/(.*)\?/);
+
+	// Capture a group from / to the end of input
+	const paramsToEndRegex = new RegExp(/\/(.*)$/);
+
+	const matchesToQuery = route.match(paramsToQueryRegex);
+	const matchesToEnd = route.match(paramsToEndRegex);
+
+	if (matchesToQuery) {
+		return matchesToQuery[1]
+	}
+
+	else if (matchesToEnd) {
+		return matchesToEnd[1]
+	}
+
+	else {
+		return ''
+	}
+};
+
+const getPathname = (route) => {
+	const splittedRouteName = route.split('/');
+
+	return `/${splittedRouteName[0]}`
+};
+
+var parseRoute = (hashRoute) => {
+	const withoutHash = stripHash(hashRoute);
+	const queries = getQueries(withoutHash);
+	const params = getParams(withoutHash);
+	const pathname = getPathname(withoutHash);
+
+	return {
+		pathname,
+		params,
+		queries: toObject(queries)
+	}
+};
 
 class Router {
 	constructor(...routes) {
@@ -885,15 +1031,11 @@ class Router {
 		this.routes = routes;
 		this.view = new RouterView(this);
 
-		if (!pushStateIsAvailable || !replaceStateIsAvailable) {
-			throw new Error('Push state is not available here, router will not work as expected...')
-		}
-
 		/*
 			If there's no hash present, then replace / with #home
 		*/
 		if (!this.currentUri) {
-			this.replace('#home');
+			this.replace('#/home');
 		}
 
 		this.replace(this.currentUri);
@@ -902,27 +1044,14 @@ class Router {
 			Update the routerView when an `onpopstate` event fires (usually
 			happens when the user clicks browser buttons).
 		*/
-		window.onpopstate = event => {
-			this.currentUri = event.state
-				? event.state.page
-				: this.currentUri;
+		window.onhashchange = () => {
+			this.replace(window.location.hash);
 
-			this.view.update(this.currentUri);
+			// Let the pages know the route has changed
+			Store$1.events.dispatch('routeChange', {
+				route: parseRoute(window.location.hash)
+			});
 		};
-	}
-
-	/**
-	 * @description - Pushes a new entry to the users' history
-	 * @param {string} uri - The hash to push to
-	 * @param {string} queryParams - queryParams to add to the hash
-	 * @example - Router.push('#home', '?js-enabled=true)
-	 */
-	push(uri, queryParams) {
-		this.currentUri = getCorrectedUri(uri, queryParams);
-
-		pushState({ page: this.currentUri }, this.currentUri);
-
-		this.view.update(this.currentUri);
 	}
 
 	/**
@@ -934,113 +1063,7 @@ class Router {
 	replace(uri, queryParams) {
 		this.currentUri = getCorrectedUri(uri, queryParams);
 
-		replaceState({ page: this.currentUri }, this.currentUri);
-
-		this.view.update(this.currentUri);
-	}
-}
-
-var parseRoute = (route) => {
-	const pathnameRegex = new RegExp(/\/(.*)\//);
-	const queryRegex = new RegExp(/\?(.*)/);
-	const paramsRegex = new RegExp(/\/(.*)\?/);
-
-	console.log(route.match(pathnameRegex));
-	console.log(route.match(paramsRegex));
-	console.log(route.match(queryRegex));
-
-	return {
-
-	}
-};
-
-class EventDispatcher {
-	constructor() {
-		this.events = {};
-	}
-
-	subscribe(eventName, callback) {
-		/*
-			Explicitly set the this context because we use our EventDispatcher
-			inside the store which has another this context
-		*/
-		const self = this;
-
-		/*
-			One event is equal to an array of callbacks that have to be fired.
-
-			If the event name is not known yet we set the value of that event to
-			an empty array so we can push the callback without having to do any
-			typechecking.
-		*/
-		if (!self.events.eventName) {
-			self.events[eventName] = [];
-		}
-
-		/*
-			We can now safely push the callback to the events from
-			our dispatcher
-		*/
-		self.events[eventName].push(callback);
-	}
-
-	dispatch(eventName, payload = {}) {
-		const self = this;
-
-		if (!self.events[eventName]) {
-			throw new ReferenceError(`Event with name: ${eventName} is not present in store. Are you sure you've subscribed something to that event?`)
-		}
-
-		/*
-			Fire off a callback for every subscriber that's subscribed
-			to the eventName
-		*/
-		self.events[eventName].map(callback => callback(payload));
-	}
-}
-
-class Store {
-	constructor({ initialState, mutations }) {
-		/*
-			Explicitly set the this context to the store since we're using our
-			dispatcher which has another this context.
-		*/
-		const self = this;
-
-		self.mutations = mutations || {};
-		self.events = new EventDispatcher;
-
-		self.state = new Proxy(initialState || {}, {
-			set(state, key, newValue) {
-				// Just set the value as you would do with an object
-				state[key] = newValue;
-
-				// Let all subscribed components know that state has changed
-				self.events.dispatch('stateChange', self.state);
-
-				return true
-			}
-		});
-	}
-
-	commit(mutationKey, payload) {
-		const self = this;
-
-		const isValidMutation = self.mutations[mutationKey] &&
-			typeof self.mutations[mutationKey] === 'function';
-
-		if (isValidMutation) {
-			const updatedState = self.mutations[mutationKey](self.state, payload);
-
-			self.state = {
-				...this.state,
-				...updatedState
-			};
-
-			return self.state
-		}
-
-		throw new Error(`Mutation ${mutationKey} does not exist.`)
+		this.view.update();
 	}
 }
 
@@ -1066,18 +1089,15 @@ class Page extends Component {
 	constructor(props) {
 		super({
 			route: parseRoute(window.location.hash),
+			store: Store$1,
 			...props
 		});
 
-		this.route = props.route ? props.route : '';
+		this.route = props.route || '';
 
-		if (this.route) {
-			const { events } = props.store;
-
-			events.subscribe('routeChange', (payload) => {
-				this.route = payload.route;
-			});
-		}
+		this.props.store.events.subscribe('routeChange', (payload) => {
+			this.route = payload.route;
+		});
 	}
 }
 
@@ -1103,26 +1123,6 @@ class RouterLink extends Component {
 		return this.element
 	}
 }
-
-const setData = (state, payload) => {
-	state.launches = payload.launches;
-
-	return state
-};
-
-var mutations = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	setData: setData
-});
-
-const initialState = {
-	items: []
-};
-
-var Store$1 = new Store({
-	initialState,
-	mutations
-});
 
 /**
  * @description Removes all childnodes inside of a parent node
