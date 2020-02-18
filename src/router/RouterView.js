@@ -1,5 +1,4 @@
 import redom from 'redom'
-import clearChildren from '../lib/clear-children'
 
 export default class RouterView {
 	constructor(router) {
@@ -17,8 +16,7 @@ export default class RouterView {
 	 */
 	update() {
 		this.router.routes.forEach(route => {
-			if (route.pathname === this.router.currentUri) {
-
+			if (route.pathname === this.router.currentRoute.pathname) {
 				// Replace existing page with new page
 				if (this.element.firstElementChild) {
 					redom.unmount(
@@ -33,27 +31,5 @@ export default class RouterView {
 				)
 			}
 		})
-
-		// Listen for router links on the page if the router isn't listening yet
-		if (!this.hasRouteListener) {
-			this.element.addEventListener('click', event => {
-				const { target } = event
-				const isRouterLink = target.getAttribute('data-router-link') !== null
-
-				if (isRouterLink) {
-					event.preventDefault()
-
-					/*
-						TODO:
-						This maybe has to be refactored as it's not really 'seperation
-						of concerns'. Now the router view is dependent on a push method
-						on the router
-					*/
-					this.router.push(target.hash)
-				}
-			})
-
-			this.hasRouteListener = true
-		}
 	}
 }

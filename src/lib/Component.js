@@ -1,4 +1,6 @@
 import redom from 'redom'
+
+import parseRoute from '../lib/parse-route'
 import Store from '../store/Store'
 
 export default class Component {
@@ -14,9 +16,7 @@ export default class Component {
 		}
 
 		if (props && props.store instanceof Store) {
-			const { events, state } = props.store
-
-			events.subscribe('stateChange', () => this.update(state))
+			props.store.events.subscribe('stateChange', newState => this.update(newState))
 		}
 	}
 }

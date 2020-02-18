@@ -1,6 +1,6 @@
 export default class Route {
 	constructor(pathname, component) {
-		this.pathname = `#${pathname}`
+		this.pathname = pathname
 		this.component = component
 	}
 
