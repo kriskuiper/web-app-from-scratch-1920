@@ -1,11 +1,8 @@
+import store from '../store'
 import getCorrectedUri from './lib/get-corrected-uri'
-import {
-	pushStateIsAvailable,
-	replaceStateIsAvailable,
-	pushState,
-	replaceState
-} from './lib/history-helpers'
+
 import RouterView from './RouterView'
+import parseRoute from '../lib/parse-route'
 
 export default class Router {
 	constructor(...routes) {
@@ -14,15 +11,11 @@ export default class Router {
 		this.routes = routes
 		this.view = new RouterView(this)
 
-		if (!pushStateIsAvailable || !replaceStateIsAvailable) {
-			throw new Error('Push state is not available here, router will not work as expected...')
-		}
-
 		/*
 			If there's no hash present, then replace / with #home
 		*/
 		if (!this.currentUri) {
-			this.replace('#home')
+			this.replace('#/home')
 		}
 
 		this.replace(this.currentUri)
@@ -31,27 +24,14 @@ export default class Router {
 			Update the routerView when an `onpopstate` event fires (usually
 			happens when the user clicks browser buttons).
 		*/
-		window.onpopstate = event => {
-			this.currentUri = event.state
-				? event.state.page
-				: this.currentUri
+		window.onhashchange = () => {
+			this.replace(window.location.hash)
 
-			this.view.update(this.currentUri)
+			// Let the pages know the route has changed
+			store.events.dispatch('routeChange', {
+				route: parseRoute(window.location.hash)
+			})
 		}
-	}
-
-	/**
-	 * @description - Pushes a new entry to the users' history
-	 * @param {string} uri - The hash to push to
-	 * @param {string} queryParams - queryParams to add to the hash
-	 * @example - Router.push('#home', '?js-enabled=true)
-	 */
-	push(uri, queryParams) {
-		this.currentUri = getCorrectedUri(uri, queryParams)
-
-		pushState({ page: this.currentUri }, this.currentUri)
-
-		this.view.update(this.currentUri)
 	}
 
 	/**
@@ -63,8 +43,6 @@ export default class Router {
 	replace(uri, queryParams) {
 		this.currentUri = getCorrectedUri(uri, queryParams)
 
-		replaceState({ page: this.currentUri }, this.currentUri)
-
-		this.view.update(this.currentUri)
+		this.view.update()
 	}
 }
