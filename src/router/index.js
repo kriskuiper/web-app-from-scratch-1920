@@ -1,5 +1,6 @@
 import store from '../store'
 import getCorrectedUri from './lib/get-corrected-uri'
+import replaceState from './lib/replace-state'
 
 import RouterView from './RouterView'
 import parseRoute from '../lib/parse-route'
@@ -7,18 +8,19 @@ import parseRoute from '../lib/parse-route'
 export default class Router {
 	constructor(...routes) {
 		this.hasRouteListener = false
-		this.currentUri = window.location.hash
+		this.currentRoute = parseRoute(window.location.hash)
 		this.routes = routes
 		this.view = new RouterView(this)
 
 		/*
-			If there's no hash present, then replace / with #home
+			If there's no hash present, then replace / with #/home
 		*/
-		if (!this.currentUri) {
+
+		if (this.currentRoute.pathname === '/') {
 			this.replace('#/home')
 		}
 
-		this.replace(this.currentUri)
+		this.replace(window.location.hash)
 
 		/*
 			Update the routerView when an `onpopstate` event fires (usually
@@ -40,8 +42,10 @@ export default class Router {
 	 * @param {string} queryParams - queryParams to add to the hash
 	 * @example - Router.replace('#home', '?my-query=awesome')
 	 */
-	replace(uri, queryParams) {
-		this.currentUri = getCorrectedUri(uri, queryParams)
+	replace(uri) {
+		this.currentRoute = parseRoute(uri)
+
+		replaceState(uri)
 
 		this.view.update()
 	}
