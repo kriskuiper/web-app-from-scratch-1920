@@ -37,6 +37,7 @@ export default class LaunchItem extends Component {
 		this.imageSizes = [
 			// TODO: add image sizes
 		]
+		this.flightNumber = props.flight_number
 	}
 
 	render() {
@@ -67,7 +68,7 @@ export default class LaunchItem extends Component {
 
 			redom.mount(
 				this.element,
-				new RouterLink({ to: 'detail', text: 'See details' }).render()
+				new RouterLink({ to: `/detail/${this.flightNumber}`, text: 'See details' }).render()
 			)
 
 		return this.element
