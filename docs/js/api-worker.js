@@ -17,7 +17,7 @@
 			return launches
 		}
 
-		async getLaunchByFlightNumber(flightNumber) {
+		async getSpecificLaunch(flightNumber) {
 			const correctedUrl = `${this.endpoint}/${flightNumber}`;
 			const response = await fetch(correctedUrl);
 			const launch = await response.json();
