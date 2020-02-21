@@ -26,11 +26,6 @@ export default class Details extends Component {
 	}
 
 	update(state) {
-		clearChildren(this.element)
-
-		state.launch && redom.mount(
-			this.element,
-			redom.el('h4', { textContent: state.launch.mission_name })
-		)
+		console.log(state)
 	}
 }
