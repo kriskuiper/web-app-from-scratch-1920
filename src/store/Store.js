@@ -47,10 +47,7 @@ export default class Store {
 		if (isValidMutation) {
 			const updatedState = self.mutations[mutationKey](self.state, payload)
 
-			self.state = {
-				...this.state,
-				...updatedState
-			}
+			self.state = Object.assign(self.state, updatedState)
 
 			return self.state
 		}
