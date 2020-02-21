@@ -18,7 +18,7 @@ export default class Details extends Component {
 		redom.mount(
 			this.element,
 			redom.el('h3', {
-				textContent: 'henk'
+				textContent: 'Loading launch data...'
 			})
 		)
 
@@ -26,6 +26,11 @@ export default class Details extends Component {
 	}
 
 	update(state) {
+		clearChildren(this.element)
 
+		redom.mount(
+			this.element,
+			redom.el('h3', { textContent: state.launch.mission_name })
+		)
 	}
 }

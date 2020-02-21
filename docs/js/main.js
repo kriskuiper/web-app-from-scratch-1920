@@ -1346,7 +1346,7 @@ class Details extends Component {
 		redom$1.mount(
 			this.element,
 			redom$1.el('h3', {
-				textContent: 'henk'
+				textContent: 'Loading launch data...'
 			})
 		);
 
@@ -1354,7 +1354,12 @@ class Details extends Component {
 	}
 
 	update(state) {
+		clearChildren(this.element);
 
+		redom$1.mount(
+			this.element,
+			redom$1.el('h3', { textContent: state.launch.mission_name })
+		);
 	}
 }
 
