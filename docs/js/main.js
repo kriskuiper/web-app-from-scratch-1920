@@ -31,7 +31,6 @@ class EventDispatcher {
 			self.events[eventName] = [];
 		}
 
-
 		self.events[eventName].push(callback);
 	}
 
@@ -1365,7 +1364,7 @@ class Details extends Component {
 class Detail extends Page {
 	constructor() {
 		super({
-			element: 'main',
+			element: 'main'
 		});
 	}
 
@@ -1382,8 +1381,6 @@ class Detail extends Page {
 		if (this.route.params) {
 			this.getSpecificLaunch(this.route.params)
 				.then(launch => {
-					console.log(launch);
-
 					store.dispatch('setLaunch', { launch });
 				})
 				.catch(console.error);
