@@ -11,20 +11,13 @@ export default class EventDispatcher {
 		const self = this
 
 		/*
-			One event is equal to an array of callbacks that have to be fired.
-
-			If the event name is not known yet we set the value of that event to
-			an empty array so we can push the callback without having to do any
-			typechecking.
+			If no event is yet present then set it to an empty array so we don't
+			have to do any further typechecking and can just push the callback
 		*/
-		if (!self.events.eventName) {
+		if (!self.events[eventName]) {
 			self.events[eventName] = []
 		}
 
-		/*
-			We can now safely push the callback to the events from
-			our dispatcher
-		*/
 		self.events[eventName].push(callback)
 	}
 
