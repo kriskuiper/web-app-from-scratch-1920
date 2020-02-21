@@ -26,6 +26,6 @@ export default class Details extends Component {
 	}
 
 	update(state) {
-		console.log(state)
+
 	}
 }
