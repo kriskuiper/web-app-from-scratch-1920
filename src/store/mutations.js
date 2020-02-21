@@ -3,3 +3,9 @@ export const setData = (state, payload) => {
 
 	return state
 }
+
+export const setLaunch = (state, payload) => {
+	state.launch = payload.launch
+
+	return state
+}
