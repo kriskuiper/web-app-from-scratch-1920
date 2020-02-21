@@ -1,7 +1,7 @@
 import EventDispatcher from './lib/EventDispatcher'
 
 export default class Store {
-	constructor({ initialState, mutations }) {
+	constructor({ initialState, mutations, actions }) {
 		/*
 			Explicitly set the this context to the store since we're using our
 			dispatcher which has another this context.
@@ -9,6 +9,7 @@ export default class Store {
 		const self = this
 
 		self.mutations = mutations || {}
+		self.actions = actions || {}
 		self.events = new EventDispatcher
 
 		self.state = new Proxy(initialState || {}, {
@@ -22,6 +23,19 @@ export default class Store {
 				return true
 			}
 		})
+	}
+
+	dispatch(actionKey, payload) {
+		const self = this
+
+		const isValidAction = self.actions[actionKey] &&
+			typeof self.actions[actionKey] === 'function'
+
+		if (isValidAction) {
+			return self.actions[actionKey](self, payload)
+		}
+
+		throw new Error(`Action ${actionKey} does not exist.`)
 	}
 
 	commit(mutationKey, payload) {

@@ -1,5 +1,6 @@
 import Store from './Store'
 import * as mutations from './mutations'
+import * as actions from './actions'
 
 const initialState = {
 	items: []
@@ -7,5 +8,6 @@ const initialState = {
 
 export default new Store({
 	initialState,
-	mutations
+	mutations,
+	actions
 })
