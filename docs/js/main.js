@@ -24,20 +24,14 @@ class EventDispatcher {
 		const self = this;
 
 		/*
-			One event is equal to an array of callbacks that have to be fired.
-
-			If the event name is not known yet we set the value of that event to
-			an empty array so we can push the callback without having to do any
-			typechecking.
+			If no event is yet present then set it to an empty array so we don't
+			have to do any further typechecking and can just push the callback
 		*/
-		if (!self.events.eventName) {
+		if (!self.events[eventName]) {
 			self.events[eventName] = [];
 		}
 
-		/*
-			We can now safely push the callback to the events from
-			our dispatcher
-		*/
+
 		self.events[eventName].push(callback);
 	}
 
@@ -57,7 +51,7 @@ class EventDispatcher {
 }
 
 class Store {
-	constructor({ initialState, mutations }) {
+	constructor({ initialState, mutations, actions }) {
 		/*
 			Explicitly set the this context to the store since we're using our
 			dispatcher which has another this context.
@@ -65,6 +59,7 @@ class Store {
 		const self = this;
 
 		self.mutations = mutations || {};
+		self.actions = actions || {};
 		self.events = new EventDispatcher;
 
 		self.state = new Proxy(initialState || {}, {
@@ -78,6 +73,19 @@ class Store {
 				return true
 			}
 		});
+	}
+
+	dispatch(actionKey, payload) {
+		const self = this;
+
+		const isValidAction = self.actions[actionKey] &&
+			typeof self.actions[actionKey] === 'function';
+
+		if (isValidAction) {
+			return self.actions[actionKey](self, payload)
+		}
+
+		throw new Error(`Action ${actionKey} does not exist.`)
 	}
 
 	commit(mutationKey, payload) {
@@ -107,18 +115,43 @@ const setData = (state, payload) => {
 	return state
 };
 
+const setLaunch = (state, payload) => {
+	state.launch = payload.launch;
+
+	return state
+};
+
 var mutations = /*#__PURE__*/Object.freeze({
 	__proto__: null,
-	setData: setData
+	setData: setData,
+	setLaunch: setLaunch
+});
+
+const SET_DATA = 'setData';
+const SET_LAUNCH = 'setLaunch';
+
+const setData$1 = (context, payload) => {
+	context.commit(SET_DATA, payload);
+};
+
+const setLaunch$1 = (context, payload) => {
+	context.commit(SET_LAUNCH, payload);
+};
+
+var actions = /*#__PURE__*/Object.freeze({
+	__proto__: null,
+	setData: setData$1,
+	setLaunch: setLaunch$1
 });
 
 const initialState = {
 	items: []
 };
 
-var Store$1 = new Store({
+var store = new Store({
 	initialState,
-	mutations
+	mutations,
+	actions
 });
 
 const replaceStateIsAvailable = typeof window !== 'undefined' &&
@@ -1062,7 +1095,7 @@ class Router {
 
 		replaceState(uri);
 
-		Store$1.events.dispatch('routeChange', {
+		store.events.dispatch('routeChange', {
 			route: parseRoute(uri)
 		});
 
@@ -1092,7 +1125,7 @@ class Page extends Component {
 	constructor(props) {
 		super({
 			route: parseRoute(window.location.hash),
-			store: Store$1,
+			store,
 			...props
 		});
 
@@ -1186,6 +1219,7 @@ class LaunchItem extends Component {
 		this.imageSizes = [
 			// TODO: add image sizes
 		];
+		this.flightNumber = props.flight_number;
 	}
 
 	render() {
@@ -1216,7 +1250,7 @@ class LaunchItem extends Component {
 
 			redom$1.mount(
 				this.element,
-				new RouterLink({ to: 'detail', text: 'See details' }).render()
+				new RouterLink({ to: `/detail/${this.flightNumber}`, text: 'See details' }).render()
 			);
 
 		return this.element
@@ -1227,7 +1261,7 @@ class LaunchList extends Component {
 	constructor(props) {
 		super({
 			element: 'div.launch-list',
-			store: Store$1,
+			store,
 			...props
 		});
 	}
@@ -1257,11 +1291,29 @@ class LaunchList extends Component {
 class Home extends Page {
 	constructor() {
 		super({
-			element: 'main'
+			element: 'main',
+			store
 		});
 	}
 
+	async getLaunches() {
+		if (window.Worker) {
+			const apiWorker = wrap(new Worker('js/api-worker.js'));
+			const Api = await new apiWorker;
+
+			const launches = await Api.getLaunches();
+
+			return launches
+		}
+	}
+
 	render() {
+		this.getLaunches()
+			.then(launches => {
+				store.dispatch('setData', { launches });
+			})
+			.catch(console.error);
+
 		if (!this.element.firstElementChild) {
 			redom$1.mount(
 				this.element,
@@ -1285,14 +1337,58 @@ class Home extends Page {
 
 var Home$1 = new Home;
 
-class Detail extends Page {
-	constructor() {
+class Details extends Component {
+	constructor(props) {
 		super({
-			element: 'main'
+			element: 'div',
+			store,
+			...props
 		});
 	}
 
 	render() {
+		redom$1.mount(
+			this.element,
+			redom$1.el('h3', {
+				textContent: 'henk'
+			})
+		);
+
+		return this.element
+	}
+
+	update(state) {
+		console.log(state);
+	}
+}
+
+class Detail extends Page {
+	constructor() {
+		super({
+			element: 'main',
+		});
+	}
+
+	async getSpecificLaunch(flightNumber) {
+		const apiWorker = wrap(new Worker('js/api-worker.js'));
+		const Api = await new apiWorker;
+
+		const launchData = await Api.getSpecificLaunch(flightNumber);
+
+		return launchData
+	}
+
+	render() {
+		if (this.route.params) {
+			this.getSpecificLaunch(this.route.params)
+				.then(launch => {
+					console.log(launch);
+
+					store.dispatch('setLaunch', { launch });
+				})
+				.catch(console.error);
+		}
+
 		if (!this.element.firstChild) {
 			redom$1.mount(
 				this.element,
@@ -1303,6 +1399,11 @@ class Detail extends Page {
 				this.element,
 				new RouterLink({ to: '/home', text: 'Go to home' }).render()
 			);
+
+			redom$1.mount(
+				this.element,
+				new Details().render()
+			);
 		}
 
 		return this.element
@@ -1311,8 +1412,6 @@ class Detail extends Page {
 
 var Detail$1 = new Detail;
 
-const SET_DATA = 'setData';
-
 class App {
 	constructor({ target }) {
 		this.router = new Router(
@@ -1320,21 +1419,10 @@ class App {
 			new Route('/detail', Detail$1)
 		);
 		this.target = document.querySelector(target);
-		this.element = this.router.view.element,
-		this.store = Store$1;
+		this.element = this.router.view.element;
 	}
 
 	async init() {
-		if (window.Worker) {
-			const apiWorker = wrap(new Worker('js/api-worker.js'));
-			const Api = await new apiWorker;
-
-			Api.getLaunches()
-				.then(launches => {
-					this.store.commit(SET_DATA, { launches });
-				});
-		}
-
 		this.target.appendChild(this.element);
 	}
 }
