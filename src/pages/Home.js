@@ -4,7 +4,6 @@ import redom from 'redom'
 import store from '../store'
 
 import Page from '../lib/Page'
-import RouterLink from '../router/RouterLink'
 import LaunchList from '../components/LaunchList'
 
 class Home extends Page {
@@ -37,11 +36,6 @@ class Home extends Page {
 			redom.mount(
 				this.element,
 				redom.el('h1', { textContent: 'Homepage' })
-			)
-
-			redom.mount(
-				this.element,
-				new RouterLink({ to: '/detail', text: 'Go to detail' }).render()
 			)
 
 			redom.mount(
