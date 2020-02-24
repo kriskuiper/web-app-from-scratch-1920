@@ -1136,6 +1136,17 @@ class Page extends Component {
 	update() {}
 }
 
+/**
+ * @description Removes all childnodes inside of a parent node
+ * @param {HTMLElement} $parent Parent node to remove all childs from
+ */
+
+var clearChildren = ($parent) => {
+	while ($parent.firstChild) {
+		$parent.removeChild($parent.firstChild);
+	}
+};
+
 class RouterLink extends Component {
 	constructor(props) {
 		super({
@@ -1158,17 +1169,6 @@ class RouterLink extends Component {
 		return this.element
 	}
 }
-
-/**
- * @description Removes all childnodes inside of a parent node
- * @param {HTMLElement} $parent Parent node to remove all childs from
- */
-
-var clearChildren = ($parent) => {
-	while ($parent.firstChild) {
-		$parent.removeChild($parent.firstChild);
-	}
-};
 
 const prefix = num => {
 	return num < 10 ? `0${num}` : num
@@ -1318,11 +1318,6 @@ class Home extends Page {
 
 			redom$1.mount(
 				this.element,
-				new RouterLink({ to: '/detail', text: 'Go to detail' }).render()
-			);
-
-			redom$1.mount(
-				this.element,
 				new LaunchList().render()
 			);
 		}
@@ -1356,9 +1351,30 @@ class Details extends Component {
 	update(state) {
 		clearChildren(this.element);
 
+		const YOUTUBE_EMBED_URL = 'https://www.youtube.com/embed/';
+
 		redom$1.mount(
 			this.element,
-			redom$1.el('h3', { textContent: state.launch.mission_name })
+			redom$1.el('article.detail-page',
+				redom$1.el('header.detail-page__header',
+					redom$1.el('h2.detail-page__title', { textContent: state.launch.mission_name }),
+					redom$1.el('p.detail-page__rocket', { textContent: `Rocket: ${state.launch.rocket.rocket_name}` })
+				),
+
+				redom$1.el('h3.detail-page__title', { textContent: 'Description:' }),
+				redom$1.el('p', { textContent: state.launch.details }),
+
+				redom$1.el('h3.detail-page__title', { textContent: 'Video:' }),
+				redom$1.el('div.detail-page__video',
+					redom$1.el('div.fixed-ratio.fixed-ratio-1by1',
+						redom$1.el('iframe.fixed-ratio-content', {
+							src: `${YOUTUBE_EMBED_URL}${state.launch.links.youtube_id}`,
+							width: '100%',
+							allowfullscreen: ''
+						})
+					),
+				)
+			)
 		);
 	}
 }
@@ -1392,11 +1408,6 @@ class Detail extends Page {
 			redom$1.mount(
 				this.element,
 				redom$1.el('h1', { textContent: 'Detail page' })
-			);
-
-			redom$1.mount(
-				this.element,
-				new RouterLink({ to: '/home', text: 'Go to home' }).render()
 			);
 
 			redom$1.mount(
