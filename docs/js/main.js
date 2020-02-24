@@ -946,40 +946,6 @@ var redom = createCommonjsModule(function (module, exports) {
 
 var redom$1 = unwrapExports(redom);
 
-class RouterView {
-	constructor(router) {
-		this.hasRouteListener = false;
-		this.router = router;
-		this.element = redom$1.el('div');
-
-		redom$1.setAttr(this.element, {
-			'data-router-view': true
-		});
-	}
-
-	/**
-	 * @description - Updates the view inside element with a new page component
-	 */
-	update() {
-		this.router.routes.forEach(route => {
-			if (route.pathname === this.router.currentRoute.pathname) {
-				// Replace existing page with new page
-				if (this.element.firstElementChild) {
-					redom$1.unmount(
-						this.element,
-						this.element.firstElementChild
-					);
-				}
-
-				redom$1.mount(
-					this.element,
-					route.component.render()
-				);
-			}
-		});
-	}
-}
-
 const toObject = (queryString) => {
 	const queries = queryString.replace('?', '');
 	const splittedQueries = queries.split('&');
@@ -1054,6 +1020,140 @@ var parseRoute = (hashRoute) => {
 	}
 };
 
+class Component {
+	constructor(props) {
+		this.props = props;
+
+		if (!this.render) {
+			throw new Error('Component needs a render function')
+		}
+
+		if (props && props.element) {
+			this.element = redom$1.el(props.element);
+		}
+
+		if (props && props.store instanceof Store) {
+			props.store.events.subscribe('stateChange', newState => this.update(newState));
+		}
+	}
+}
+
+class Page extends Component {
+	constructor(props) {
+		super({
+			route: parseRoute(window.location.hash),
+			store,
+			...props
+		});
+
+		this.route = props.route || '';
+
+		this.props.store.events.subscribe('routeChange', (payload) => {
+			this.route = payload.route;
+		});
+	}
+
+	// TODO: fix this in a nicer way
+	update() {}
+}
+
+class RouterLink extends Component {
+	constructor(props) {
+		super({
+			element: 'a',
+			to: `#${props.to}`,
+			text: props.text
+		});
+	}
+
+	render() {
+		redom$1.setAttr(
+			this.element,
+			{
+				href: this.props.to,
+				'data-router-link': '',
+				textContent: this.props.text
+			}
+		);
+
+		return this.element
+	}
+}
+
+class Error$1 extends Page {
+	constructor(errorMessage) {
+		super({
+			element: 'main'
+		});
+
+		this.errorMessage = errorMessage;
+	}
+
+	render() {
+		redom$1.mount(
+			this.element,
+			redom$1.el('h1', { textContent: this.errorMessage })
+		);
+
+		redom$1.mount(
+			this.element,
+			new RouterLink({ to: '/home', text: 'Back to homepage' }).render()
+		);
+
+		return this.element
+	}
+}
+
+class RouterView {
+	constructor(router) {
+		this.hasRouteListener = false;
+		this.router = router;
+		this.element = redom$1.el('div');
+
+		redom$1.setAttr(this.element, {
+			'data-router-view': true
+		});
+	}
+
+	/**
+	 * @description - Updates the view inside element with a new page component
+	 */
+	update() {
+		let routeSuccess = false;
+
+		this.router.routes.forEach(route => {
+			if (route.pathname === this.router.currentRoute.pathname) {
+				// Replace existing page with new page
+				if (this.element.firstElementChild) {
+					redom$1.unmount(
+						this.element,
+						this.element.firstElementChild
+					);
+				}
+
+				redom$1.mount(
+					this.element,
+					route.component.render()
+				);
+
+				routeSuccess = true;
+			}
+		});
+
+		if (!routeSuccess) {
+			redom$1.unmount(
+				this.element,
+				this.element.firstElementChild
+			);
+
+			redom$1.mount(
+				this.element,
+				new Error$1('Oops, this page does not exist :(').render()
+			);
+		}
+	}
+}
+
 class Router {
 	constructor(...routes) {
 		this.hasRouteListener = false;
@@ -1099,43 +1199,6 @@ class Router {
 	}
 }
 
-class Component {
-	constructor(props) {
-		this.props = props;
-
-		if (!this.render) {
-			throw new Error('Component needs a render function')
-		}
-
-		if (props && props.element) {
-			this.element = redom$1.el(props.element);
-		}
-
-		if (props && props.store instanceof Store) {
-			props.store.events.subscribe('stateChange', newState => this.update(newState));
-		}
-	}
-}
-
-class Page extends Component {
-	constructor(props) {
-		super({
-			route: parseRoute(window.location.hash),
-			store,
-			...props
-		});
-
-		this.route = props.route || '';
-
-		this.props.store.events.subscribe('routeChange', (payload) => {
-			this.route = payload.route;
-		});
-	}
-
-	// TODO: fix this in a nicer way
-	update() {}
-}
-
 /**
  * @description Removes all childnodes inside of a parent node
  * @param {HTMLElement} $parent Parent node to remove all childs from
@@ -1146,29 +1209,6 @@ var clearChildren = ($parent) => {
 		$parent.removeChild($parent.firstChild);
 	}
 };
-
-class RouterLink extends Component {
-	constructor(props) {
-		super({
-			element: 'a',
-			to: `#${props.to}`,
-			text: props.text
-		});
-	}
-
-	render() {
-		redom$1.setAttr(
-			this.element,
-			{
-				href: this.props.to,
-				'data-router-link': '',
-				textContent: this.props.text
-			}
-		);
-
-		return this.element
-	}
-}
 
 const prefix = num => {
 	return num < 10 ? `0${num}` : num
