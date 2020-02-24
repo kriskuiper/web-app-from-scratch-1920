@@ -40,11 +40,6 @@ class Detail extends Page {
 
 			redom.mount(
 				this.element,
-				new RouterLink({ to: '/home', text: 'Go to home' }).render()
-			)
-
-			redom.mount(
-				this.element,
 				new Details().render()
 			)
 		}
