@@ -5,6 +5,7 @@ import clearChildren from '../lib/clear-children'
 import Component from '../lib/Component'
 import LaunchItem from './LaunchItem'
 
+
 export default class LaunchList extends Component {
 	constructor(props) {
 		super({

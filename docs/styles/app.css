@@ -3,6 +3,7 @@
 	--color-darkest: #000;
 	--color-lightest: #fff;
 	--color-loading: #eee;
+	--color-loading-dark: #333;
 
 	/* Spacing */
 	--spacing-large: 25px;
@@ -203,4 +204,33 @@ body {
 
 .detail-page__title {
 	margin-bottom: var(--spacing-default)
+}
+
+/* Buttons */
+button {
+	border: 0;
+	background: transparent;
+}
+
+.next-page-button {
+	background: var(--color-darkest);
+	color: var(--color-lightest);
+	text-transform: uppercase;
+	font-size: var(--font-size-default);
+	padding: var(--spacing-default);
+	display: block;
+	width: 100%;
+	margin: 0 auto;
+}
+
+.next-page-button:disabled {
+	background: var(--color-loading-dark);
+	color: var(--color-lightest);
+	opacity: .8;
+}
+
+@media (min-width: 375px) {
+	.next-page-button {
+		max-width: 600px;
+	}
 }

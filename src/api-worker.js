@@ -5,8 +5,11 @@ class Api {
 		this.endpoint = 'https://api.spacexdata.com/v3/launches'
 	}
 
-	async getLaunches() {
-		const response = await fetch(this.endpoint)
+	async getLaunches(page = 1) {
+		const PAGE_SIZE = 20
+		const OFFSET = (page - 1) * PAGE_SIZE
+
+		const response = await fetch(`${this.endpoint}?limit=${PAGE_SIZE}&offset=${OFFSET}`)
 		const launches = await response.json()
 
 		return launches

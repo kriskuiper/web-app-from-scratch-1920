@@ -1332,16 +1332,61 @@ class Home extends Page {
 			element: 'main',
 			store
 		});
+
+		const FIRST_PAGE = 1;
+
+		this.pageNumber = this.route.query && this.route.query.pageNumber
+			|| FIRST_PAGE;
+		this.isLoading = false;
+
+		this.nextPageButton = redom$1.el('button.next-page-button', {
+			textContent: 'Load more'
+		});
+
+		this.nextPageButton.onclick = async () => {
+			await this.loadNextPage();
+		};
 	}
 
-	async getLaunches() {
+	async getLaunches(pageNumber) {
 		if (window.Worker) {
 			const apiWorker = wrap(new Worker('js/api-worker.js'));
 			const Api = await new apiWorker;
 
-			const launches = await Api.getLaunches();
+			const launches = await Api.getLaunches(pageNumber);
 
 			return launches
+		}
+	}
+
+	async loadNextPage() {
+		try {
+			this.pageNumber = this.pageNumber + 1;
+
+			this.nextPageButton.textContent = 'Loading...';
+			this.nextPageButton.setAttribute('disabled', 'disabled');
+
+			const PAGE_SIZE = 20;
+			const launches = await this.getLaunches(this.pageNumber);
+			const newLaunches = [...store.state.launches, ...launches];
+
+			store.dispatch('setData', { launches: newLaunches });
+
+			if (launches.length < PAGE_SIZE) {
+				redom$1.unmount(
+					this.element,
+					this.nextPageButton
+				);
+			}
+		}
+
+		catch(error) {
+			console.log(error);
+		}
+
+		finally {
+			this.nextPageButton.textContent = 'Load more';
+			this.nextPageButton.removeAttribute('disabled');
 		}
 	}
 
@@ -1361,6 +1406,11 @@ class Home extends Page {
 			redom$1.mount(
 				this.element,
 				new LaunchList().render()
+			);
+
+			redom$1.mount(
+				this.element,
+				this.nextPageButton
 			);
 		}
 
