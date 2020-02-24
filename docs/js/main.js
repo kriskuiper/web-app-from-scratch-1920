@@ -1141,14 +1141,16 @@ class RouterView {
 		});
 
 		if (!routeSuccess) {
-			redom$1.unmount(
-				this.element,
-				this.element.firstElementChild
-			);
+			if (this.element.firstElementChild) {
+				redom$1.unmount(
+					this.element,
+					this.element.firstElementChild
+				);
+			}
 
 			redom$1.mount(
 				this.element,
-				new Error$1('Oops, this page does not exist :(').render()
+				new Error$1('Oops, this page does not exist 😭').render()
 			);
 		}
 	}

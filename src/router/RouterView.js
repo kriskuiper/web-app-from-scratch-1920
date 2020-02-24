@@ -38,14 +38,16 @@ export default class RouterView {
 		})
 
 		if (!routeSuccess) {
-			redom.unmount(
-				this.element,
-				this.element.firstElementChild
-			)
+			if (this.element.firstElementChild) {
+				redom.unmount(
+					this.element,
+					this.element.firstElementChild
+				)
+			}
 
 			redom.mount(
 				this.element,
-				new ErrorPage('Oops, this page does not exist :(').render()
+				new ErrorPage('Oops, this page does not exist 😭').render()
 			)
 		}
 	}
