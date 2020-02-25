@@ -1,5 +1,3 @@
-import * as Comlink from 'https://unpkg.com/comlink@alpha/dist/esm/comlink.mjs'
-
 import Route from './router/Route'
 import Router from './router'
 
