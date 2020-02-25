@@ -1266,8 +1266,10 @@ class LaunchItem extends Component {
 		].join(', ');
 		this.fallbackImage = props.links.mission_patch;
 		this.imageSizes = [
-			// TODO: add image sizes
-		];
+			'(min-width: 800px) 33vw',
+			'(min-width: 400px) 50vw',
+			'100vw'
+		].join(', ');
 		this.flightNumber = props.flight_number;
 	}
 
