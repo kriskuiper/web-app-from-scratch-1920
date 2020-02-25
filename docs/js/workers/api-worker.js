@@ -3,6 +3,8 @@
 	factory();
 }((function () { 'use strict';
 
+	const PAGE_SIZE = 24;
+
 	importScripts("https://unpkg.com/comlink@alpha/dist/umd/comlink.js");
 
 	class Api {
@@ -11,7 +13,6 @@
 		}
 
 		async getLaunches(page = 1) {
-			const PAGE_SIZE = 24;
 			const OFFSET = (page - 1) * PAGE_SIZE;
 			const url = `${this.endpoint}?limit=${PAGE_SIZE}&offset=${OFFSET}`;
 

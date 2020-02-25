@@ -1202,6 +1202,7 @@ class Router {
 }
 
 const LAUNCHES_NAME = 'latest_launches';
+const PAGE_SIZE = 24;
 
 var useApi = async () => {
 	if (window.Worker) {
@@ -1447,7 +1448,6 @@ class Home extends Page {
 			this.nextPageButton.textContent = 'Loading...';
 			this.nextPageButton.setAttribute('disabled', 'disabled');
 
-			const PAGE_SIZE = 20;
 			const launches = await useData({ page: this.pageNumber });
 			const newLaunches = [...store.state.launches, ...launches];
 
@@ -1475,6 +1475,7 @@ class Home extends Page {
 		useData({ page: this.pageNumber })
 			.then(launches => {
 				store.dispatch('setData', { launches });
+				useLocalStorage.set('data', launches);
 			})
 			.catch(console.error);
 

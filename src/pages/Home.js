@@ -2,6 +2,8 @@ import redom from 'redom'
 
 import store from '../store'
 import useData from '../composables/use-data'
+import useLocalStorage from '../composables/use-local-storage'
+import { PAGE_SIZE } from '../lib/constants'
 
 import Page from '../lib/Page'
 import LaunchList from '../components/LaunchList'
@@ -32,7 +34,6 @@ class Home extends Page {
 			this.nextPageButton.textContent = 'Loading...'
 			this.nextPageButton.setAttribute('disabled', 'disabled')
 
-			const PAGE_SIZE = 20
 			const launches = await useData({ page: this.pageNumber })
 			const newLaunches = [...store.state.launches, ...launches]
 
@@ -60,6 +61,7 @@ class Home extends Page {
 		useData({ page: this.pageNumber })
 			.then(launches => {
 				store.dispatch('setData', { launches })
+				useLocalStorage.set('data', launches)
 			})
 			.catch(console.error)
 
