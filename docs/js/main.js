@@ -1201,6 +1201,8 @@ class Router {
 	}
 }
 
+const LAUNCHES_NAME = 'latest_launches';
+
 var useApi = async () => {
 	if (window.Worker) {
 		const apiWorker = wrap(new Worker('js/workers/api-worker.js'));
@@ -1210,6 +1212,63 @@ var useApi = async () => {
 	}
 
 	throw new Error('Worker is not present, you can not use workers')
+};
+
+const storage = window.localStorage;
+
+var useLocalStorage = {
+	get(name) {
+		return new Promise((resolve, reject) => {
+			const item = storage.getItem(name);
+
+			if (!item) {
+				reject('No item found in localStorage');
+			}
+
+			else {
+				resolve(JSON.parse(item));
+			}
+		})
+	},
+	set(name, value) {
+		return new Promise(resolve => {
+			storage.setItem(name, JSON.stringify(value));
+
+			resolve();
+		})
+	},
+	remove(name) {
+		return new Promise((resolve, reject) => {
+			const item = storage.getItem(name);
+
+			if (!item) {
+				reject('That item does not exist in localStorage');
+			}
+
+			else {
+				storage.removeItem(name);
+
+				resolve();
+			}
+		})
+	}
+};
+
+var useData = async ({ flightNumber, page }) => {
+	const localStorage = useLocalStorage;
+	const api = await useApi();
+
+	if (page) {
+		return api.getLaunches(page)
+			.catch(() => {
+				return localStorage.get(LAUNCHES_NAME)
+			})
+	}
+
+	return api.getSpecificLaunch(flightNumber)
+		.catch(() => {
+			return localStorage.get(flightNumber)
+		})
 };
 
 /**
@@ -1369,10 +1428,7 @@ class Home extends Page {
 			store
 		});
 
-		const FIRST_PAGE = 1;
-
-		this.pageNumber = this.route.query && this.route.query.pageNumber
-			|| FIRST_PAGE;
+		this.pageNumber = 1;
 		this.isLoading = false;
 
 		this.nextPageButton = redom$1.el('button.next-page-button', {
@@ -1384,13 +1440,6 @@ class Home extends Page {
 		};
 	}
 
-	async getLaunches(pageNumber) {
-			const Api = await useApi();
-			const launches = await Api.getLaunches(pageNumber);
-
-			return launches
-	}
-
 	async loadNextPage() {
 		try {
 			this.pageNumber = this.pageNumber + 1;
@@ -1399,7 +1448,7 @@ class Home extends Page {
 			this.nextPageButton.setAttribute('disabled', 'disabled');
 
 			const PAGE_SIZE = 20;
-			const launches = await this.getLaunches(this.pageNumber);
+			const launches = await useData({ page: this.pageNumber });
 			const newLaunches = [...store.state.launches, ...launches];
 
 			store.dispatch('setData', { launches: newLaunches });
@@ -1423,7 +1472,7 @@ class Home extends Page {
 	}
 
 	render() {
-		this.getLaunches()
+		useData({ page: this.pageNumber })
 			.then(launches => {
 				store.dispatch('setData', { launches });
 			})
@@ -1510,17 +1559,9 @@ class Detail extends Page {
 		});
 	}
 
-	async getSpecificLaunch(flightNumber) {
-		const Api = await useApi();
-
-		const launchData = await Api.getSpecificLaunch(flightNumber);
-
-		return launchData
-	}
-
 	render() {
 		if (this.route.params) {
-			this.getSpecificLaunch(this.route.params)
+			useData({ flightNumber: this.route.params })
 				.then(launch => {
 					store.dispatch('setLaunch', { launch });
 				})

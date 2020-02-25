@@ -1,7 +1,7 @@
 import redom from 'redom'
 
 import store from '../store'
-import useApi from '../lib/use-api'
+import useData from '../composables/use-data'
 
 import Page from '../lib/Page'
 import LaunchList from '../components/LaunchList'
@@ -13,10 +13,7 @@ class Home extends Page {
 			store
 		})
 
-		const FIRST_PAGE = 1
-
-		this.pageNumber = this.route.query && this.route.query.pageNumber
-			|| FIRST_PAGE
+		this.pageNumber = 1
 		this.isLoading = false
 
 		this.nextPageButton = redom.el('button.next-page-button', {
@@ -28,13 +25,6 @@ class Home extends Page {
 		}
 	}
 
-	async getLaunches(pageNumber) {
-			const Api = await useApi()
-			const launches = await Api.getLaunches(pageNumber)
-
-			return launches
-	}
-
 	async loadNextPage() {
 		try {
 			this.pageNumber = this.pageNumber + 1
@@ -43,7 +33,7 @@ class Home extends Page {
 			this.nextPageButton.setAttribute('disabled', 'disabled')
 
 			const PAGE_SIZE = 20
-			const launches = await this.getLaunches(this.pageNumber)
+			const launches = await useData({ page: this.pageNumber })
 			const newLaunches = [...store.state.launches, ...launches]
 
 			store.dispatch('setData', { launches: newLaunches })
@@ -67,7 +57,7 @@ class Home extends Page {
 	}
 
 	render() {
-		this.getLaunches()
+		useData({ page: this.pageNumber })
 			.then(launches => {
 				store.dispatch('setData', { launches })
 			})

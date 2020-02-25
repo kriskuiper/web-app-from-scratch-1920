@@ -2,7 +2,7 @@ import * as Comlink from 'https://unpkg.com/comlink@alpha/dist/esm/comlink.mjs'
 import redom from 'redom'
 
 import store from '../store'
-import useApi from '../lib/use-api'
+import useData from '../composables/use-data'
 
 import Page from '../lib/Page'
 import Details from '../components/Details'
@@ -14,17 +14,9 @@ class Detail extends Page {
 		})
 	}
 
-	async getSpecificLaunch(flightNumber) {
-		const Api = await useApi()
-
-		const launchData = await Api.getSpecificLaunch(flightNumber)
-
-		return launchData
-	}
-
 	render() {
 		if (this.route.params) {
-			this.getSpecificLaunch(this.route.params)
+			useData({ flightNumber: this.route.params })
 				.then(launch => {
 					store.dispatch('setLaunch', { launch })
 				})
