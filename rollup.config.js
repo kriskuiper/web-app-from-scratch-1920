@@ -17,9 +17,9 @@ export default [
 		]
 	},
 	{
-		input: 'src/api-worker.js',
+		input: 'src/workers/api-worker.js',
 		output: {
-			file: 'docs/js/api-worker.js',
+			file: 'docs/js/workers/api-worker.js',
 			format: 'umd',
 		},
 		plugins: [

@@ -1,7 +1,7 @@
-import * as Comlink from 'https://unpkg.com/comlink@alpha/dist/esm/comlink.mjs'
 import redom from 'redom'
 
 import store from '../store'
+import useApi from '../lib/use-api'
 
 import Page from '../lib/Page'
 import LaunchList from '../components/LaunchList'
@@ -9,7 +9,7 @@ import LaunchList from '../components/LaunchList'
 class Home extends Page {
 	constructor() {
 		super({
-			element: 'main',
+			element: 'main.page',
 			store
 		})
 
@@ -29,14 +29,10 @@ class Home extends Page {
 	}
 
 	async getLaunches(pageNumber) {
-		if (window.Worker) {
-			const apiWorker = Comlink.wrap(new Worker('js/api-worker.js'))
-			const Api = await new apiWorker
-
+			const Api = await useApi()
 			const launches = await Api.getLaunches(pageNumber)
 
 			return launches
-		}
 	}
 
 	async loadNextPage() {

@@ -1201,6 +1201,17 @@ class Router {
 	}
 }
 
+var useApi = async () => {
+	if (window.Worker) {
+		const apiWorker = wrap(new Worker('js/workers/api-worker.js'));
+		const Api = await new apiWorker;
+
+		return Api
+	}
+
+	throw new Error('Worker is not present, you can not use workers')
+};
+
 /**
  * @description Removes all childnodes inside of a parent node
  * @param {HTMLElement} $parent Parent node to remove all childs from
@@ -1329,7 +1340,7 @@ class LaunchList extends Component {
 class Home extends Page {
 	constructor() {
 		super({
-			element: 'main',
+			element: 'main.page',
 			store
 		});
 
@@ -1349,14 +1360,10 @@ class Home extends Page {
 	}
 
 	async getLaunches(pageNumber) {
-		if (window.Worker) {
-			const apiWorker = wrap(new Worker('js/api-worker.js'));
-			const Api = await new apiWorker;
-
+			const Api = await useApi();
 			const launches = await Api.getLaunches(pageNumber);
 
 			return launches
-		}
 	}
 
 	async loadNextPage() {
@@ -1474,13 +1481,12 @@ class Details extends Component {
 class Detail extends Page {
 	constructor() {
 		super({
-			element: 'main'
+			element: 'main.page'
 		});
 	}
 
 	async getSpecificLaunch(flightNumber) {
-		const apiWorker = wrap(new Worker('js/api-worker.js'));
-		const Api = await new apiWorker;
+		const Api = await useApi();
 
 		const launchData = await Api.getSpecificLaunch(flightNumber);
 

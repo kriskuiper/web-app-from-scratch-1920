@@ -46,6 +46,10 @@ p:not(:last-child) {
 	margin-bottom: var(--spacing-default);
 }
 
+.page {
+	margin-bottom: var(--spacing-large);
+}
+
 .sr-only {
 	/*
 		Improved sr-only by Gaël Poupard

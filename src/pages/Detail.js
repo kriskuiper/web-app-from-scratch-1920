@@ -2,21 +2,20 @@ import * as Comlink from 'https://unpkg.com/comlink@alpha/dist/esm/comlink.mjs'
 import redom from 'redom'
 
 import store from '../store'
+import useApi from '../lib/use-api'
 
 import Page from '../lib/Page'
-import RouterLink from '../router/RouterLink'
 import Details from '../components/Details'
 
 class Detail extends Page {
 	constructor() {
 		super({
-			element: 'main'
+			element: 'main.page'
 		})
 	}
 
 	async getSpecificLaunch(flightNumber) {
-		const apiWorker = Comlink.wrap(new Worker('js/api-worker.js'))
-		const Api = await new apiWorker
+		const Api = await useApi()
 
 		const launchData = await Api.getSpecificLaunch(flightNumber)
 
