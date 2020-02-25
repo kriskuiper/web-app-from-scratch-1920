@@ -1,20 +1,21 @@
 import redom from 'redom'
+import dayjs from 'dayjs'
 
 import Component from '../lib/Component'
 import RouterLink from '../router/RouterLink'
 import formatDate from '../lib/format-date'
-
-const maybeSetDataSuccess = successState => {
-	return successState
-		? 'data-success'
-		: ''
-}
 
 const getIcon = successState => {
 	const baseUrl = '/assets/icons/'
 	const iconName = successState ? 'check.svg' : 'warning.svg'
 
 	return `${baseUrl}${iconName}`
+}
+
+const launchPrefix = launchDate => {
+	return dayjs(launchDate).isBefore(dayjs())
+		? 'Launched:'
+		: 'Will launch:'
 }
 
 export default class LaunchItem extends Component {
@@ -65,7 +66,7 @@ export default class LaunchItem extends Component {
 					redom.el('img.launch-item__icon', { src: getIcon(this.isSuccess) }),
 					redom.el('div',
 						redom.el('h3', { textContent: this.name }),
-						redom.el('p', { textContent: `Launched: ${formatDate(this.launchDate)}` })
+						redom.el('p', { textContent: `${launchPrefix(this.launchDate)} ${formatDate(this.launchDate)}` })
 					)
 				),
 				redom.el('picture.fixed-ratio.fixed-ratio-1by1',

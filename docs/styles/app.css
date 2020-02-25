@@ -50,7 +50,7 @@ p:not(:last-child) {
 }
 
 .page {
-	max-width: var(--layout-medium);
+	max-width: var(--text-max-width);
 	margin: 0 auto;
 	margin-bottom: var(--spacing-large);
 }
