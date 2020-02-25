@@ -1255,6 +1255,8 @@ class LaunchItem extends Component {
 			...props
 		});
 
+		const notFoundImage = 'https://via.placeholder.com/300.webp/333/fff?text=image not found :(';
+
 		this.name = props.mission_name;
 		this.launchSite = props.launch_site.site_name_long;
 		this.isSuccess = props.launch_success;
@@ -1264,13 +1266,27 @@ class LaunchItem extends Component {
 			`${props.links.mission_patch_small} 400w`,
 			`${props.links.mission_patch} 800w`
 		].join(', ');
-		this.fallbackImage = props.links.mission_patch;
+		this.fallbackImage = props.links.mission_patch || notFoundImage;
 		this.imageSizes = [
 			'(min-width: 800px) 33vw',
 			'(min-width: 400px) 50vw',
 			'100vw'
 		].join(', ');
 		this.flightNumber = props.flight_number;
+
+		this.image = redom$1.el('img.launch-item__image.fixed-ratio-content', {
+			src: this.fallbackImage,
+			alt: `${this.name} mission logo`
+		});
+	}
+
+	addSizesToImageIfExists() {
+		const hasMissionPatch = Boolean(this.props.links.mission_patch);
+
+		if (hasMissionPatch) {
+			this.image.setAttribute('srcSet', this.imageSrcSet);
+			this.image.setAttribute('sizes', this.imageSizes);
+		}
 	}
 
 	render() {
@@ -1284,12 +1300,7 @@ class LaunchItem extends Component {
 					)
 				),
 				redom$1.el('picture.fixed-ratio.fixed-ratio-1by1',
-					redom$1.el('img.launch-item__image.fixed-ratio-content', {
-						src: this.fallbackImage,
-						srcSet: this.imageSrcSet,
-						sizes: this.imageSizes,
-						alt: `${this.name} mission logo`
-					})
+					this.image
 				),
 				redom$1.el('div.launch-item__details',
 					redom$1.el('ul.unstyled-list',
@@ -1298,6 +1309,8 @@ class LaunchItem extends Component {
 					)
 				)
 			);
+
+			this.addSizesToImageIfExists();
 
 			redom$1.mount(
 				this.element,
