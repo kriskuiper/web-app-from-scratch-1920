@@ -11,157 +11,6 @@ class Route {
 	}
 }
 
-class EventDispatcher {
-	constructor() {
-		this.events = {};
-	}
-
-	subscribe(eventName, callback) {
-		/*
-			Explicitly set the this context because we use our EventDispatcher
-			inside the store which has another this context
-		*/
-		const self = this;
-
-		/*
-			If no event is yet present then set it to an empty array so we don't
-			have to do any further typechecking and can just push the callback
-		*/
-		if (!self.events[eventName]) {
-			self.events[eventName] = [];
-		}
-
-		self.events[eventName].push(callback);
-	}
-
-	dispatch(eventName, payload = {}) {
-		const self = this;
-
-		if (!self.events[eventName]) {
-			throw new ReferenceError(`Event with name: ${eventName} is not present in store. Are you sure you've subscribed something to that event?`)
-		}
-
-		/*
-			Fire off a callback for every subscriber that's subscribed
-			to the eventName
-		*/
-		self.events[eventName].map(callback => callback(payload));
-	}
-}
-
-class Store {
-	constructor({ initialState, mutations, actions }) {
-		/*
-			Explicitly set the this context to the store since we're using our
-			dispatcher which has another this context.
-		*/
-		const self = this;
-
-		self.mutations = mutations || {};
-		self.actions = actions || {};
-		self.events = new EventDispatcher;
-
-		self.state = new Proxy(initialState || {}, {
-			set(state, key, newValue) {
-				// Just set the value as you would do with an object
-				state[key] = newValue;
-
-				// Let all subscribed components know that state has changed
-				self.events.dispatch('stateChange', self.state);
-
-				return true
-			}
-		});
-	}
-
-	dispatch(actionKey, payload) {
-		const self = this;
-
-		const isValidAction = self.actions[actionKey] &&
-			typeof self.actions[actionKey] === 'function';
-
-		if (isValidAction) {
-			return self.actions[actionKey](self, payload)
-		}
-
-		throw new Error(`Action ${actionKey} does not exist.`)
-	}
-
-	commit(mutationKey, payload) {
-		const self = this;
-
-		const isValidMutation = self.mutations[mutationKey] &&
-			typeof self.mutations[mutationKey] === 'function';
-
-		if (isValidMutation) {
-			const updatedState = self.mutations[mutationKey](self.state, payload);
-
-			self.state = Object.assign(self.state, updatedState);
-
-			return self.state
-		}
-
-		throw new Error(`Mutation ${mutationKey} does not exist.`)
-	}
-}
-
-const setData = (state, payload) => {
-	state.launches = payload.launches;
-
-	return state
-};
-
-const setLaunch = (state, payload) => {
-	state.launch = payload.launch;
-
-	return state
-};
-
-var mutations = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	setData: setData,
-	setLaunch: setLaunch
-});
-
-const SET_DATA = 'setData';
-const SET_LAUNCH = 'setLaunch';
-
-const setData$1 = (context, payload) => {
-	context.commit(SET_DATA, payload);
-};
-
-const setLaunch$1 = (context, payload) => {
-	context.commit(SET_LAUNCH, payload);
-};
-
-var actions = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	setData: setData$1,
-	setLaunch: setLaunch$1
-});
-
-const initialState = {
-	items: []
-};
-
-var store = new Store({
-	initialState,
-	mutations,
-	actions
-});
-
-const replaceStateIsAvailable = typeof window !== 'undefined' &&
-	window.history &&
-	window.history.replaceState;
-
-var replaceState = (uri) => {
-	if (replaceStateIsAvailable) {
-		return window.history.replaceState({ page: uri }, null, uri)
-	}
-
-	throw new Error('Replace state is not available, please update your browser.')
-};
-
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 function unwrapExports (x) {
@@ -946,6 +795,145 @@ var redom = createCommonjsModule(function (module, exports) {
 
 var redom$1 = unwrapExports(redom);
 
+class EventDispatcher {
+	constructor() {
+		this.events = {};
+	}
+
+	subscribe(eventName, callback) {
+		/*
+			Explicitly set the this context because we use our EventDispatcher
+			inside the store which has another this context
+		*/
+		const self = this;
+
+		/*
+			If no event is yet present then set it to an empty array so we don't
+			have to do any further typechecking and can just push the callback
+		*/
+		if (!self.events[eventName]) {
+			self.events[eventName] = [];
+		}
+
+		self.events[eventName].push(callback);
+	}
+
+	dispatch(eventName, payload = {}) {
+		const self = this;
+
+		if (!self.events[eventName]) {
+			throw new ReferenceError(`Event with name: ${eventName} is not present in store. Are you sure you've subscribed something to that event?`)
+		}
+
+		/*
+			Fire off a callback for every subscriber that's subscribed
+			to the eventName
+		*/
+		self.events[eventName].map(callback => callback(payload));
+	}
+}
+
+class Store {
+	constructor({ initialState, mutations, actions }) {
+		/*
+			Explicitly set the this context to the store since we're using our
+			dispatcher which has another this context.
+		*/
+		const self = this;
+
+		self.mutations = mutations || {};
+		self.actions = actions || {};
+		self.events = new EventDispatcher;
+
+		self.state = new Proxy(initialState || {}, {
+			set(state, key, newValue) {
+				// Just set the value as you would do with an object
+				state[key] = newValue;
+
+				// Let all subscribed components know that state has changed
+				self.events.dispatch('stateChange', self.state);
+
+				return true
+			}
+		});
+	}
+
+	dispatch(actionKey, payload) {
+		const self = this;
+
+		const isValidAction = self.actions[actionKey] &&
+			typeof self.actions[actionKey] === 'function';
+
+		if (isValidAction) {
+			return self.actions[actionKey](self, payload)
+		}
+
+		throw new Error(`Action ${actionKey} does not exist.`)
+	}
+
+	commit(mutationKey, payload) {
+		const self = this;
+
+		const isValidMutation = self.mutations[mutationKey] &&
+			typeof self.mutations[mutationKey] === 'function';
+
+		if (isValidMutation) {
+			const updatedState = self.mutations[mutationKey](self.state, payload);
+
+			self.state = Object.assign(self.state, updatedState);
+
+			return self.state
+		}
+
+		throw new Error(`Mutation ${mutationKey} does not exist.`)
+	}
+}
+
+const setData = (state, payload) => {
+	state.launches = payload.launches;
+
+	return state
+};
+
+const setLaunch = (state, payload) => {
+	state.launch = payload.launch;
+
+	return state
+};
+
+var mutations = /*#__PURE__*/Object.freeze({
+	__proto__: null,
+	setData: setData,
+	setLaunch: setLaunch
+});
+
+const SET_DATA = 'setData';
+const SET_LAUNCH = 'setLaunch';
+
+const setData$1 = (context, payload) => {
+	context.commit(SET_DATA, payload);
+};
+
+const setLaunch$1 = (context, payload) => {
+	context.commit(SET_LAUNCH, payload);
+};
+
+var actions = /*#__PURE__*/Object.freeze({
+	__proto__: null,
+	setData: setData$1,
+	setLaunch: setLaunch$1
+});
+
+const initialState = {
+	items: []
+};
+
+var store = new Store({
+	initialState,
+	mutations,
+	actions
+});
+
 const toObject = (queryString) => {
 	const queries = queryString.replace('?', '');
 	const splittedQueries = queries.split('&');
@@ -1104,64 +1092,29 @@ class Error$1 extends Page {
 	}
 }
 
-class RouterView {
-	constructor(router) {
-		this.hasRouteListener = false;
-		this.router = router;
-		this.element = redom$1.el('div');
+const replaceStateIsAvailable = typeof window !== 'undefined' &&
+	window.history &&
+	window.history.replaceState;
 
-		redom$1.setAttr(this.element, {
-			'data-router-view': true
-		});
+var replaceState = (uri) => {
+	if (replaceStateIsAvailable) {
+		return window.history.replaceState({ page: uri }, null, uri)
 	}
 
-	/**
-	 * @description - Updates the view inside element with a new page component
-	 */
-	update() {
-		let routeSuccess = false;
-
-		this.router.routes.forEach(route => {
-			if (route.pathname === this.router.currentRoute.pathname) {
-				// Replace existing page with new page
-				if (this.element.firstElementChild) {
-					redom$1.unmount(
-						this.element,
-						this.element.firstElementChild
-					);
-				}
-
-				redom$1.mount(
-					this.element,
-					route.component.render()
-				);
-
-				routeSuccess = true;
-			}
-		});
-
-		if (!routeSuccess) {
-			if (this.element.firstElementChild) {
-				redom$1.unmount(
-					this.element,
-					this.element.firstElementChild
-				);
-			}
-
-			redom$1.mount(
-				this.element,
-				new Error$1('Oops, this page does not exist 😭').render()
-			);
-		}
-	}
-}
+	throw new Error('Replace state is not available, please update your browser.')
+};
 
 class Router {
 	constructor(...routes) {
 		this.hasRouteListener = false;
 		this.currentRoute = parseRoute(window.location.hash);
 		this.routes = routes;
-		this.view = new RouterView(this);
+
+		// Initialize router Element
+		this.routerElement = redom$1.el('div');
+		redom$1.setAttr(this.routerElement, {
+			'data-router-view': true
+		});
 
 		/*
 			If there's no hash present, then replace / with #/home
@@ -1197,7 +1150,44 @@ class Router {
 			route: parseRoute(uri)
 		});
 
-		this.view.update();
+		this.updateView();
+	}
+
+	updateView() {
+		let routeSuccess = false;
+
+		this.routes.forEach(route => {
+			if (route.pathname === this.currentRoute.pathname) {
+				// Replace existing page with new page
+				if (this.routerElement.firstElementChild) {
+					redom$1.unmount(
+						this.routerElement,
+						this.routerElement.firstElementChild
+					);
+				}
+
+				redom$1.mount(
+					this.routerElement,
+					route.component.render()
+				);
+
+				routeSuccess = true;
+			}
+		});
+
+		if (!routeSuccess) {
+			if (this.routerElement.firstElementChild) {
+				redom$1.unmount(
+					this.routerElement,
+					this.routerElement.firstElementChild
+				);
+			}
+
+			redom$1.mount(
+				this.routerElement,
+				new Error$1('Oops, this page does not exist 😭').render()
+			);
+		}
 	}
 }
 
@@ -1594,11 +1584,10 @@ class App {
 			new Route('/detail', Detail$1)
 		);
 		this.target = document.querySelector(target);
-		this.element = this.router.view.element;
 	}
 
 	async init() {
-		this.target.appendChild(this.element);
+		this.target.appendChild(this.router.routerElement);
 	}
 }
 

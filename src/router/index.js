@@ -1,8 +1,9 @@
-import store from '../store'
-import getCorrectedUri from './lib/get-corrected-uri'
-import replaceState from './lib/replace-state'
+import redom from 'redom'
 
-import RouterView from './RouterView'
+import store from '../store'
+import ErrorPage from '../pages/Error'
+
+import replaceState from './lib/replace-state'
 import parseRoute from '../lib/parse-route'
 
 export default class Router {
@@ -10,7 +11,12 @@ export default class Router {
 		this.hasRouteListener = false
 		this.currentRoute = parseRoute(window.location.hash)
 		this.routes = routes
-		this.view = new RouterView(this)
+
+		// Initialize router Element
+		this.routerElement = redom.el('div')
+		redom.setAttr(this.routerElement, {
+			'data-router-view': true
+		})
 
 		/*
 			If there's no hash present, then replace / with #/home
@@ -46,6 +52,43 @@ export default class Router {
 			route: parseRoute(uri)
 		})
 
-		this.view.update()
+		this.updateView()
+	}
+
+	updateView() {
+		let routeSuccess = false
+
+		this.routes.forEach(route => {
+			if (route.pathname === this.currentRoute.pathname) {
+				// Replace existing page with new page
+				if (this.routerElement.firstElementChild) {
+					redom.unmount(
+						this.routerElement,
+						this.routerElement.firstElementChild
+					)
+				}
+
+				redom.mount(
+					this.routerElement,
+					route.component.render()
+				)
+
+				routeSuccess = true
+			}
+		})
+
+		if (!routeSuccess) {
+			if (this.routerElement.firstElementChild) {
+				redom.unmount(
+					this.routerElement,
+					this.routerElement.firstElementChild
+				)
+			}
+
+			redom.mount(
+				this.routerElement,
+				new ErrorPage('Oops, this page does not exist 😭').render()
+			)
+		}
 	}
 }

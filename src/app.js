@@ -15,10 +15,9 @@ export default class App {
 			new Route('/detail', Detail)
 		)
 		this.target = document.querySelector(target)
-		this.element = this.router.view.element
 	}
 
 	async init() {
-		this.target.appendChild(this.element)
+		this.target.appendChild(this.router.routerElement)
 	}
 }
