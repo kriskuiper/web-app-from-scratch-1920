@@ -7,6 +7,12 @@ export default async ({ flightNumber, page }) => {
 	const localStorage = useLocalStorage
 	const api = await useApi()
 
+
+	/**
+	 * When fetching all data, we want to first see
+	 * if we can reach the API, since that's the source
+	 * of truth.
+	 */
 	if (page) {
 		return api.getLaunches(page)
 			.catch(() => {
@@ -14,8 +20,13 @@ export default async ({ flightNumber, page }) => {
 			})
 	}
 
-	return api.getSpecificLaunch(flightNumber)
+	/**
+	 * However, when fetching a single result, we first
+	 * can look in localStorage since that's set when a
+	 * user has visited the launch page once.
+	 */
+	return localStorage.get(flightNumber)
 		.catch(() => {
-			return localStorage.get(flightNumber)
+			return api.getSpecificLaunch(flightNumber)
 		})
 }

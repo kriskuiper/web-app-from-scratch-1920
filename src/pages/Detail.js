@@ -3,6 +3,7 @@ import redom from 'redom'
 
 import store from '../store'
 import useData from '../composables/use-data'
+import useLocalStorage from '../composables/use-local-storage'
 
 import Page from '../lib/Page'
 import Details from '../components/Details'
@@ -19,6 +20,7 @@ class Detail extends Page {
 			useData({ flightNumber: this.route.params })
 				.then(launch => {
 					store.dispatch('setLaunch', { launch })
+					useLocalStorage.set(this.route.params, launch)
 				})
 				.catch(console.error)
 		}

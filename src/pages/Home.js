@@ -2,7 +2,6 @@ import redom from 'redom'
 
 import store from '../store'
 import useData from '../composables/use-data'
-import useLocalStorage from '../composables/use-local-storage'
 import { PAGE_SIZE } from '../lib/constants'
 
 import Page from '../lib/Page'
@@ -61,7 +60,6 @@ class Home extends Page {
 		useData({ page: this.pageNumber })
 			.then(launches => {
 				store.dispatch('setData', { launches })
-				useLocalStorage.set('data', launches)
 			})
 			.catch(console.error)
 
