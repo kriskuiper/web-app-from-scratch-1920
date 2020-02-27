@@ -2,7 +2,8 @@ import redom from 'redom'
 
 import store from '../store'
 import useData from '../composables/use-data'
-import { PAGE_SIZE } from '../lib/constants'
+import useLocalStorage from '../composables/use-local-storage'
+import { PAGE_SIZE, LAUNCH_DATA_NAME } from '../lib/constants'
 
 import Page from '../lib/Page'
 import LaunchList from '../components/LaunchList'
@@ -16,6 +17,7 @@ class Home extends Page {
 
 		this.pageNumber = 1
 		this.isLoading = false
+		this.hasError = false
 
 		this.nextPageButton = redom.el('button.next-page-button', {
 			textContent: 'Load more'
@@ -60,10 +62,26 @@ class Home extends Page {
 		useData({ page: this.pageNumber })
 			.then(launches => {
 				store.dispatch('setData', { launches })
-			})
-			.catch(console.error)
 
-		if (!this.element.firstElementChild) {
+				// Also put the latest launches in localStorage. If the API fails on
+				// us we can use the localStorage data. Fail silently.
+				useLocalStorage.set(LAUNCH_DATA_NAME, launches)
+					.catch(() => null)
+			})
+			.catch(error => {
+				console.error('Failed to load data: ', error)
+
+				redom.mount(
+					this.element,
+					redom.el('h1', { textContent: 'Whoops, we could not load data' })
+				)
+
+				// TODO: refactor this in the future, this is a bit all over the place
+				// if we have to do more error handling elsewhere.
+				this.hasError = true
+			})
+
+		if (!this.element.firstElementChild && !this.hasError) {
 			redom.mount(
 				this.element,
 				redom.el('h1', { textContent: 'Homepage' })
