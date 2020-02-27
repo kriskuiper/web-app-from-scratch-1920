@@ -25,6 +25,16 @@ Below are some interaction diagrams for specific actions in the application.
 ### Rendering the homepage
 ![Homepage rendering interaction diagram](assets/interaction-diagram.png)
 
+### Rendering a detail page
+![Detail page rendering]()
+
+### Changing a route
+![Changing a route]()
+
+### Getting data
+![Getting data interaction diagram]()
+![Getting data for detail page interaction diagram]()
+
 ## Features
 ### Overview
 An overview of the data a user wants to see, results are paginated and get updated while the user scrolls down.
@@ -67,5 +77,3 @@ As far as I know there are no limitations to the API. You can just call the abov
 - [ ] Make it a Progressive Web App
 - [ ] Make the project use it's own virtual DOM
 - [ ] Make it server-side rendered
-
-<!-- How about a license here? 📜 (or is it a licence?) 🤷 -->
