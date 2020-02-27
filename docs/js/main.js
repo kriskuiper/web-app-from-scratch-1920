@@ -1191,7 +1191,7 @@ class Router {
 	}
 }
 
-const LAUNCHES_NAME = 'latest_launches';
+const LAUNCH_DATA_NAME = 'latest_launches';
 const PAGE_SIZE = 24;
 
 var useApi = async () => {
@@ -1249,7 +1249,6 @@ var useData = async ({ flightNumber, page }) => {
 	const localStorage = useLocalStorage;
 	const api = await useApi();
 
-
 	/**
 	 * When fetching all data, we want to first see
 	 * if we can reach the API, since that's the source
@@ -1258,7 +1257,7 @@ var useData = async ({ flightNumber, page }) => {
 	if (page) {
 		return api.getLaunches(page)
 			.catch(() => {
-				return localStorage.get(LAUNCHES_NAME)
+				return localStorage.get(LAUNCH_DATA_NAME)
 			})
 	}
 
@@ -1307,7 +1306,7 @@ var formatDate = date => {
 };
 
 const getIcon = successState => {
-	const baseUrl = '/assets/icons/';
+	const baseUrl = 'assets/icons/';
 	const iconName = successState ? 'check.svg' : 'warning.svg';
 
 	return `${baseUrl}${iconName}`
@@ -1432,6 +1431,7 @@ class Home extends Page {
 
 		this.pageNumber = 1;
 		this.isLoading = false;
+		this.hasError = false;
 
 		this.nextPageButton = redom$1.el('button.next-page-button', {
 			textContent: 'Load more'
@@ -1476,10 +1476,26 @@ class Home extends Page {
 		useData({ page: this.pageNumber })
 			.then(launches => {
 				store.dispatch('setData', { launches });
-			})
-			.catch(console.error);
 
-		if (!this.element.firstElementChild) {
+				// Also put the latest launches in localStorage. If the API fails on
+				// us we can use the localStorage data. Fail silently.
+				useLocalStorage.set(LAUNCH_DATA_NAME, launches)
+					.catch(() => null);
+			})
+			.catch(error => {
+				console.error('Failed to load data: ', error);
+
+				redom$1.mount(
+					this.element,
+					redom$1.el('h1', { textContent: 'Whoops, we could not load data' })
+				);
+
+				// TODO: refactor this in the future, this is a bit all over the place
+				// if we have to do more error handling elsewhere.
+				this.hasError = true;
+			});
+
+		if (!this.element.firstElementChild && !this.hasError) {
 			redom$1.mount(
 				this.element,
 				redom$1.el('h1', { textContent: 'Homepage' })
