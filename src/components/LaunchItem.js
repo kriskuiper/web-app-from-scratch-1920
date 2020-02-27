@@ -6,7 +6,7 @@ import RouterLink from '../router/RouterLink'
 import formatDate from '../lib/format-date'
 
 const getIcon = successState => {
-	const baseUrl = '/assets/icons/'
+	const baseUrl = 'assets/icons/'
 	const iconName = successState ? 'check.svg' : 'warning.svg'
 
 	return `${baseUrl}${iconName}`
