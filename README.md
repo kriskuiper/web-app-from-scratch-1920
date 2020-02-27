@@ -29,10 +29,8 @@ Below are some interaction diagrams for specific actions in the application.
 ### Overview
 An overview of the data a user wants to see, results are paginated and get updated while the user scrolls down.
 
-### Filtering
-The user can choose which data they want to see as long if it's one of the following:
-- Launches
-- Rockets
+## Pagination
+Results are paginated. Each page has a limit of 24 results. When clicking 'load more' results will be loaded and added to the already present results.
 
 ### Details
 User can see details of a specific launch or rocket on a detail page. The detail page consists of a description, some minor details like the launch site and a video of the launch if available.
