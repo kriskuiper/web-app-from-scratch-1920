@@ -29,7 +29,7 @@ Below are some interaction diagrams for specific actions in the application.
 ### Overview
 An overview of the data a user wants to see, results are paginated and get updated while the user scrolls down.
 
-## Pagination
+### Pagination
 Results are paginated. Each page has a limit of 24 results. When clicking 'load more' results will be loaded and added to the already present results.
 
 ### Details
