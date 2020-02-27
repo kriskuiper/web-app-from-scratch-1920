@@ -1,6 +1,6 @@
 # Launcher
 
-> Launcher shows all SpaceX launches, rockets, pods and dragons from 2006 to now. Users can view details and filter the results
+> Launcher shows all SpaceX launches from 2006 to now. Users can view details and filter the results
 
 ![Launcher home page](assets/launcher-home-page.png)
 
