@@ -67,3 +67,4 @@ As far as I know there are no limitations to the API. You can just call the abov
 - [ ] Make it a Progressive Web App
 - [ ] Make the project use it's own virtual DOM
 - [ ] Make it server-side rendered
+- [ ] Add more interaction diagrams to make it even clearer how the app works
