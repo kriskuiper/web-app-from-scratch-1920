@@ -25,10 +25,6 @@ Below are some interaction diagrams for specific actions in the application.
 ### Rendering the homepage
 ![Homepage rendering interaction diagram](assets/home-page-rendering-new.png)
 
-### Getting data
-![Getting data interaction diagram]()
-![Getting data for detail page interaction diagram]()
-
 ## Features
 ### Overview
 An overview of the data a user wants to see, results are paginated and get updated while the user scrolls down.
