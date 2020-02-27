@@ -17,19 +17,13 @@ yarn dev / npm run dev
 ```
 
 ## Actor diagram
-![Launcher actor diagram](assets/actor-diagram.png)
+![Launcher actor diagram](assets/actor-diagram-new.png)
 
 ## Interaction diagrams
 Below are some interaction diagrams for specific actions in the application.
 
 ### Rendering the homepage
-![Homepage rendering interaction diagram](assets/interaction-diagram.png)
-
-### Rendering a detail page
-![Detail page rendering]()
-
-### Changing a route
-![Changing a route]()
+![Homepage rendering interaction diagram](assets/home-page-rendering-new.png)
 
 ### Getting data
 ![Getting data interaction diagram]()
